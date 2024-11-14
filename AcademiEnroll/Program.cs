@@ -27,7 +27,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Cuenta/Login"; // Ruta de la vista de Login
         options.LogoutPath = "/Home/CerrarSesion"; // Ruta para cerrar sesión
         options.AccessDeniedPath = "/Cuenta/AccesoDenegado"; // Ruta en caso de acceso denegado
-    });
+		options.ExpireTimeSpan = TimeSpan.FromMinutes(15); //Cerrar sesión automáticamente despues de 15 minutos de inactividad
+	});
 
 builder.Services.AddAuthorization();
 
