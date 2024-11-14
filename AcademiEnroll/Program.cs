@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using AcademiEnroll.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System;
+using AcademiEnroll.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +12,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AcademiEnrollContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("AcademiEnrollConnection"));
-
 });
+
+// Registrar MantenimientoEstudiante
+builder.Services.AddScoped<MantenimientoEstudiante>();
+
+// Registrar MantenimientoUsuario
+builder.Services.AddScoped<MantenimientoUsuario>();
 
 // Configuración de autenticación por cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

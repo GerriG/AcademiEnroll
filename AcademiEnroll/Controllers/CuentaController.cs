@@ -81,6 +81,41 @@ public class CuentaController : Controller
         {
             // Guardar el usuario en la base de datos
             _context.Usuarios.Add(usuario);
+            _context.SaveChanges(); // Guarda el usuario primero
+
+            // Dependiendo del rol, insertar en la tabla correspondiente
+            if (usuario.Rol == "Estudiante")
+            {
+                var estudiante = new Estudiante
+                {
+                    Nombre = usuario.Nombre,                    
+                    Correo = usuario.Correo,
+                    IdUsuario = usuario.IdUsuario // Asigna el IdUsuario del usuario recién insertado
+                };
+                _context.Estudiantes.Add(estudiante);
+            }
+            else if (usuario.Rol == "Docente")
+            {
+                var docente = new Docente
+                {
+                    Nombre = usuario.Nombre,                    
+                    Correo = usuario.Correo,
+                    IdUsuario = usuario.IdUsuario // Asigna el IdUsuario del usuario recién insertado
+                };
+                _context.Docentes.Add(docente);
+            }
+            else if (usuario.Rol == "Administrador")
+            {
+                var administrador = new AcademiEnroll.Models.Administrador
+                {
+                    Nombre = usuario.Nombre,                    
+                    Correo = usuario.Correo,
+                    IdUsuario = usuario.IdUsuario // Asigna el IdUsuario del usuario recién insertado
+                };
+                _context.Administrador.Add(administrador);
+            }
+
+            // Guardar los cambios adicionales para las tablas de roles
             _context.SaveChanges();
 
             ViewBag.Nombre = usuario.Nombre;
@@ -90,9 +125,9 @@ public class CuentaController : Controller
         }
 
         ModelState.AddModelError("", "Error al registrar el usuario.");
-
         return View();
     }
+
 
 
 

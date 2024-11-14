@@ -1,6 +1,9 @@
-﻿@model AcademiEnroll.Models.Usuario
+﻿@model IEnumerable<AcademiEnroll.Models.Docente>
 @{
-    ViewData["Title"] = "Vista Docente";
+    ViewData["Title"] = "Vista Administrador";
+}
+@{
+    Layout = "~/Views/Shared/_LayoutDocente.cshtml";
 }
 
 <h1>Bienvenido Docente</h1>

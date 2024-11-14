@@ -1,0 +1,69 @@
+﻿@model IEnumerable<AcademiEnroll.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Agregar Usuario</a>
+</p>
+<table id="usuario" class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Correo)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Clave)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Rol)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Correo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Clave)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Rol)
+            </td>
+            <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdUsuario" class="btn btn-primary">Editar</a> |
+                    <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-info">Detalles</a> |
+                    <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-danger">Eliminar</a> |
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+@section Scripts {
+
+    <script src="//cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            let table = new DataTable('#usuario', {
+                "language": {
+                    "url": "https://cdn.datatables.net/plug-ins/2.1.8/i18n/es-MX.json"
+                }
+            });
+        });
+    </script>
+
+}
