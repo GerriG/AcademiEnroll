@@ -31,8 +31,8 @@ namespace Administrador.Controllers
         // GET: EstudianteController/Create
         public ActionResult Create()
         {
-            return View();
-        }
+			return RedirectToAction("Registro", "Cuenta");
+		}
 
         // POST: EstudianteController/Create
         [HttpPost]
