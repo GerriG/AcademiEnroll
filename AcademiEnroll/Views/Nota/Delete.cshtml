@@ -1,39 +1,42 @@
 ﻿@model AcademiEnroll.Models.Nota
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Eliminar Nota";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h3>Detalles de notas</h3>
-
+<h3>¿Estás seguro de que quieres eliminar esta nota?</h3>
 <div>
+    <h4>Nota</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.NombreEstudiante)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.NombreEstudiante)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.NombreAsignatura)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.NombreAsignatura)
         </dd>
-        <dt class = "col-sm-2">
+
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Calificacion)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Calificacion)
         </dd>
     </dl>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Borrar" class="btn btn-danger" />
+        |
+        <a asp-action="Index" class="btn btn-warning">Regresar al listado</a>
+    </form>
 </div>
-<div>
-    @if (ViewBag.Rol == "Administrador")
-    {
-    @Html.ActionLink("Modificar", "Edit", new { id = Model.Id }, new { @class = "btn btn-primary btn-sm" })
-    }|
-    <a asp-action="Index" class="btn btn-warning btn-sm">Regresar al listado</a>
-</div>
+

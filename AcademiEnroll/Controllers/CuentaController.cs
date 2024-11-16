@@ -60,16 +60,27 @@ public class CuentaController : Controller
     }
 
     // Creacion de  la vista de Registro    
-    public IActionResult Registro()
+    public IActionResult Registro(string tipo)
     {
-        var rol = User.FindFirst("Rol")?.Value;
-        if (rol != "Administrador")
+        // Validación para asegurar que solo un administrador pueda acceder
+        var userRol = User.FindFirst("Rol")?.Value;
+        if (userRol != "Administrador")
         {
             return RedirectToAction("Login");
         }
 
-        return View();
+        // Crear un nuevo objeto Usuario
+        var model = new Usuario();
+
+        // Si se recibe un parámetro "tipo" no vacío, asignarlo al modelo
+        if (!string.IsNullOrEmpty(tipo))
+        {
+            model.Rol = tipo;  // Asignar "Docente" si el parámetro es "Docente"
+        }
+
+        return View(model);  // Pasar el modelo con el valor predeterminado
     }
+
 
 
 

@@ -31,7 +31,7 @@ namespace Administrador.Controllers
         // GET: UsuarioController/Create
         public ActionResult Create()
         {
-            return RedirectToAction("Registro", "Cuenta");
+            return RedirectToAction("Registro", "Cuenta", new { tipo = "Administrador" });
         }
 
         // POST: UsuarioController/Create

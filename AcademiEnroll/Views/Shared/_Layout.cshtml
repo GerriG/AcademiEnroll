@@ -7,7 +7,8 @@
     <link href="~/images/logo/logo_pestaña.png" rel="icon" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/AcademiEnroll.styles.css" asp-append-version="true" />    
+    <link rel="stylesheet" href="~/AcademiEnroll.styles.css" asp-append-version="true" />
+    <link href="//cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css" rel="stylesheet" />
 </head>
 <body>
     <header>
@@ -21,10 +22,45 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/images/logo/Logonav.png" alt="Logo de la academia" width="70px" height="auto" /></a>
 
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">                        
+
+                        @* Validación para mostrar los elementos solo si el claim "Rol" es "Administrador" *@
+                        @if (User.FindFirst("Rol")?.Value == "Administrador")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Cuenta" asp-action="VistaAdmin">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Docente" asp-action="Index">Docentes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Estudiante" asp-action="Index">Estudiantes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Usuario" asp-action="Index">Usuarios</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Nota" asp-action="Index">Notas</a>
+                            </li>
+                        }
+                        @if (User.FindFirst("Rol")?.Value == "Docente")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Cuenta" asp-action="VistaDocente">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Nota" asp-action="Index">Notas</a>
+                            </li>
+                        }
+                        @if (User.FindFirst("Rol")?.Value == "Estudiante")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Cuenta" asp-action="VistaEstudiante">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Nota" asp-action="Index">Consultar Notas</a>
+                            </li>
+                        }
                     </ul>
 
                     <div class="d-flex align-items-center">

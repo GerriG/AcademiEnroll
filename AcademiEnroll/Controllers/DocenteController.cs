@@ -34,14 +34,15 @@ namespace Administrador.Controllers
 			return View(docente);
 		}
 
-		// GET: DocenteController/Create
-		public ActionResult Create()
-		{
-			return RedirectToAction("Registro", "Cuenta");
-		}
+        // GET: DocenteController/Create
+        public ActionResult Create()
+        {
+            return RedirectToAction("Registro", "Cuenta", new { tipo = "Docente" });
+        }
 
-		// POST: DocenteController/Create
-		[HttpPost]
+
+        // POST: DocenteController/Create
+        [HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<ActionResult> Create([Bind("Nombre,Apellido,Correo,IdUsuario")] Docente docente)
 		{

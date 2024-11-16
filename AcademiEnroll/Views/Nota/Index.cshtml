@@ -2,8 +2,15 @@
 
 @{
     ViewData["Title"] = "Index";
-    Layout = "~/Views/Shared/_LayoutDocente.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+<p>
+    @if ((bool)ViewBag.EsDocente)
+    {
+        <a asp-action="Create" class="btn btn-success">Cargar Nota</a>
+    }
+</p>
 
 <h1>Listado de notas</h1>
 
@@ -35,8 +42,15 @@
                 @Html.DisplayFor(modelItem => item.Calificacion)
             </td>
             <td>
-             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Editar</a> |
-             <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Detalles</a> |
+                @if ((bool)ViewBag.EsAdministrador)
+                {
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Editar</a>
+                }|
+                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Detalles</a> |
+                @if ((bool)ViewBag.EsAdministrador)
+                {                
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Eliminar</a>
+                }                
             </td>
         </tr>
 }
