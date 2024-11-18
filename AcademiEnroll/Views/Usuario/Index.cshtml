@@ -8,8 +8,11 @@
 <h1>Usuarios Registrados</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-success">Agregar Admin</a>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="fas fa-user-plus"></i> Agregar Admin
+    </a>
 </p>
+
 <table id="usuario" class="table table-striped">
     <thead>
         <tr>
@@ -18,38 +21,44 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Nombre)
-            </th>            
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Rol)
             </th>
-            <th></th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Correo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>            
-            <td>
-                @Html.DisplayFor(modelItem => item.Rol)
-            </td>
-            <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdUsuario" class="btn btn-primary">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-info">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-danger">Eliminar</a> |
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Correo)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Rol)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.IdUsuario" class="btn btn-primary btn-sm" title="Editar">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-info btn-sm" title="Detalles">
+                        <i class="fas fa-info-circle"></i> Detalles
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-danger btn-sm" title="Eliminar">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
 @section Scripts {
-
     <script src="//cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
-
     <script>
         $(document).ready(function () {
             let table = new DataTable('#usuario', {
@@ -59,5 +68,4 @@
             });
         });
     </script>
-
 }

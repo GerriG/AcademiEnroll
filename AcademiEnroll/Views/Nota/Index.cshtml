@@ -8,7 +8,9 @@
 <p>
     @if ((bool)ViewBag.EsDocente)
     {
-        <a asp-action="Create" class="btn btn-success">Cargar Nota</a>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus"></i> Cargar Nota
+        </a>
     }
 </p>
 
@@ -26,40 +28,46 @@
             <th>
                 @Html.DisplayNameFor(model => model.Calificacion)
             </th>
-            <th></th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreEstudiante)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NombreAsignatura)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Calificacion)
-            </td>
-            <td>
-                @if ((bool)ViewBag.EsAdministrador)
-                {
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Editar</a>
-                }|
-                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info">Detalles</a> |
-                @if ((bool)ViewBag.EsAdministrador)
-                {                
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Eliminar</a>
-                }                
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NombreEstudiante)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NombreAsignatura)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Calificacion)
+                </td>
+                <td>
+                    @if ((bool)ViewBag.EsAdministrador)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm" title="Editar">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    }
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Detalles">
+                        <i class="fas fa-info-circle"></i> Detalles
+                    </a>
+                    @if ((bool)ViewBag.EsAdministrador)
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Eliminar">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
 @section Scripts {
-
     <script src="//cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
-
     <script>
         $(document).ready(function () {
             let table = new DataTable('#Nota', {
@@ -69,5 +77,5 @@
             });
         });
     </script>
-
 }
+

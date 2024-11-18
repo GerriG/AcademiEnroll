@@ -8,21 +8,24 @@
 <h1>Listado de docentes</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-success">Agregar nuevo docente</a>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="fas fa-user-plus"></i> Agregar Docente
+    </a>
 </p>
+
 <table id="docente" class="table table-striped">
     <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.Nombre)
-            </th>            
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Correo)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.IdUsuario)
             </th>
-            <th></th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -31,7 +34,7 @@
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.Nombre)
-                </td>                
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Correo)
                 </td>
@@ -39,19 +42,23 @@
                     @Html.DisplayFor(modelItem => item.IdUsuario)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.IdDocente" class="btn btn-primary">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.IdDocente" class="btn btn-info">Detalles</a> |
-                    <a asp-action="Delete" asp-route-id="@item.IdDocente" class="btn btn-danger">Eliminar</a> |
-
+                    <a asp-action="Edit" asp-route-id="@item.IdDocente" class="btn btn-primary btn-sm" title="Editar">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a asp-action="Details" asp-route-id="@item.IdDocente" class="btn btn-info btn-sm" title="Detalles">
+                        <i class="fas fa-info-circle"></i> Detalles
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@item.IdDocente" class="btn btn-danger btn-sm" title="Eliminar">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
 @section Scripts {
-
     <script src="//cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
-
     <script>
         $(document).ready(function () {
             let table = new DataTable('#docente', {
@@ -61,5 +68,5 @@
             });
         });
     </script>
-
 }
+

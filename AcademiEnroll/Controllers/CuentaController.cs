@@ -35,6 +35,7 @@ public class CuentaController : Controller
             var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, usuario.Nombre),
+            new Claim(ClaimTypes.Email, usuario.Correo),  // Agregar el correo al claim
             new Claim("Rol", usuario.Rol)  // Guardar el rol en una claim personalizada
         };
 
@@ -173,6 +174,34 @@ public class CuentaController : Controller
 
         return View();
     }
+
+    // Creación de la vista de Perfil
+
+    [Authorize]  // Asegurar que solo usuarios autenticados accedan
+    public IActionResult Perfil()
+    {
+        // Obtener el correo del usuario autenticado desde los claims
+        var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+
+        // Validar que el correo exista en los claims
+        if (string.IsNullOrEmpty(correoUsuario))
+        {
+            return RedirectToAction("Login");  // Redirigir si no está autenticado
+        }
+
+        // Buscar el usuario en la base de datos
+        var usuario = _context.Usuarios.SingleOrDefault(u => u.Correo == correoUsuario);
+
+        // Validar que se haya encontrado el usuario
+        if (usuario == null)
+        {
+            return RedirectToAction("Login");  // Redirigir si no se encuentra
+        }
+
+        // Crear un modelo o pasar directamente el usuario
+        return View(usuario);
+    }
+
 
 
     // Creación de la vista para el Docente

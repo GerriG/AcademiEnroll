@@ -1,0 +1,20 @@
+﻿@model AcademiEnroll.Models.Usuario
+
+@{
+    ViewData["Title"] = "Perfil de Usuario";
+}
+
+<h2>Perfil de Usuario</h2>
+
+<div>
+    <h3>Bienvenido, @Model.Nombre</h3>
+    <ul>
+        <li><strong>Correo:</strong> @Model.Correo</li>
+        <li><strong>Rol:</strong> @Model.Rol</li>
+    </ul>
+</div>
+
+<form method="post" asp-controller="Home" asp-action="Salir" class="d-inline">
+    <button type="submit" class="btn btn-danger">Cerrar sesión</button>
+</form>
+
