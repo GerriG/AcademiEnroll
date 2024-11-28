@@ -43,6 +43,10 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Nota" asp-action="Index">Notas</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Materias" asp-action="Index">Materias</a>
+                            </li>
+
                         }
                         @if (User.FindFirst("Rol")?.Value == "Docente")
                         {

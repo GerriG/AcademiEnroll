@@ -14,10 +14,9 @@ namespace AcademiEnroll.Data
         public DbSet<Docente> Docentes { get; set; }
         public DbSet<Estudiante> Estudiantes { get; set; }
         public DbSet<Models.Administrador> Administrador { get; set; }
-
+        public DbSet<Materia> Materias { get; set; }
         public DbSet<Nota> Notas { get; set; }
-
-        public DbSet<Inscripcion> Inscripciones { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,9 +24,13 @@ namespace AcademiEnroll.Data
             modelBuilder.Entity<Docente>().HasKey(d => d.IdDocente);
             modelBuilder.Entity<Estudiante>().HasKey(e => e.IdEstudiante);
             modelBuilder.Entity<Models.Administrador>().HasKey(e => e.IdAdministrador);
-            // Configura otros modelos según sea necesario
-
-
+            
+            // Relación Materia -> Usuario (Docente)
+            modelBuilder.Entity<Materia>()
+                .HasOne(m => m.Docente)
+                .WithMany()
+                .HasForeignKey(m => m.IdDocente)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

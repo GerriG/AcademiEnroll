@@ -61,10 +61,6 @@ namespace AcademiEnroll.Controllers
             return View(todasLasNotas);
         }
 
-
-
-
-
         // GET: NotaController/Details/5
         public async Task<ActionResult> Details(int id)
         {
@@ -84,7 +80,6 @@ namespace AcademiEnroll.Controllers
 
             return View(nota); // Retorna la nota a la vista
         }
-
 
         // GET: NotaController/Edit/5
         public async Task<IActionResult> Edit(int id)
@@ -107,8 +102,6 @@ namespace AcademiEnroll.Controllers
 
             return View(nota);
         }
-
-
 
         // POST: NotaController/Edit/5
         [HttpPost]
@@ -163,12 +156,17 @@ namespace AcademiEnroll.Controllers
                 .Select(e => e.Nombre)
                 .ToListAsync();
 
+            // Obtener los nombres de las asignaturas
+            var asignaturas = await _context.Materias
+                .Select(m => m.Nombre)
+                .ToListAsync();
+
             // Pasar los datos al ViewBag
             ViewBag.Estudiantes = new SelectList(estudiantes);
+            ViewBag.Asignaturas = new SelectList(asignaturas);
 
             return View();
         }
-
 
         // POST: NotaController/Create
         [HttpPost]
@@ -189,6 +187,16 @@ namespace AcademiEnroll.Controllers
             }
 
             // Si no es válida, regresar a la vista con los errores
+            // Recargar los datos del ViewBag
+            var estudiantes = await _context.Estudiantes
+                .Select(e => e.Nombre)
+                .ToListAsync();
+            var asignaturas = await _context.Materias
+                .Select(m => m.Nombre)
+                .ToListAsync();
+            ViewBag.Estudiantes = new SelectList(estudiantes);
+            ViewBag.Asignaturas = new SelectList(asignaturas);
+
             return View(nota);
         }
 
@@ -214,8 +222,6 @@ namespace AcademiEnroll.Controllers
             return View(nota); // Mostrar la vista de confirmación con los detalles de la nota
         }
 
-
-
         // POST: Nota/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -234,7 +240,6 @@ namespace AcademiEnroll.Controllers
 
             return RedirectToAction(nameof(Index)); // Redirigir al listado después de la eliminación
         }
-
 
         private bool NotaExists(int id)
         {
