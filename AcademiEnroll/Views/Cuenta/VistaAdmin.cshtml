@@ -1,10 +1,119 @@
-﻿@model AcademiEnroll.Models.Usuario
+﻿@model AcademiEnroll.Models.DashBoard
+
 @{
     ViewData["Title"] = "Vista Administrador";
-}
-@{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Bienvenido Administrador</h1>
+<h1 class="mt-4">Dashboard</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Dashboard</li>
+</ol>
 
+<div class="row">
+    <!-- Primera Fila -->
+    <div class="col-xl-4 col-md-6">
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Cantidad de Docentes</h6>
+                        <h6 id="totalDocentes">@Model.TotalDocentes</h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+        <div class="card bg-primary text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Cantidad de Alumnos</h6>
+                        <h6 id="totalEstudiantes">@Model.TotalEstudiantes</h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-user-graduate fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+        <div class="card bg-success text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Alumnos Aprobados</h6>
+                        <h6 id="totalAprobados">@Model.TotalAprobados</h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-user-check fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Segunda Fila -->
+    <div class="col-xl-4 col-md-6">
+        <div class="card bg-danger text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Alumnos Reprobados</h6>
+                        <h6 id="totalReprobados">@Model.TotalReprobados</h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-user-times fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+        <div class="card bg-warning text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Materias Impartidas</h6>
+                        <h6 id="totalMaterias">@Model.TotalMaterias</h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-book fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-md-6">
+        <div class="card bg-info text-white mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <h6>Total de Usuarios</h6>
+                        <h6 id="totalUsuarios">@Model.TotalUsuarios</h6>
+                    </div>
+                    <div class="col-sm-3">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <hr />
+
+
+</div>

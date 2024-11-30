@@ -8,21 +8,22 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 public class CuentaController : Controller
 {
     private readonly AcademiEnrollContext _context;
 
-    
     public CuentaController(AcademiEnrollContext context)
     {
         _context = context;
     }
 
-    // Creacion de la vista principal de Login
-    public IActionResult Login() => View();    
+    // Creación de la vista principal de Login
+    public IActionResult Login() => View();
 
-    // Creacion de la logica para procesar el Login
+    // Creación de la lógica para procesar el Login
     [HttpPost]
     public IActionResult Login(string correo, string clave)
     {
@@ -33,11 +34,11 @@ public class CuentaController : Controller
         {
             // Crear las claims del usuario
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, usuario.Nombre),
-            new Claim(ClaimTypes.Email, usuario.Correo),  // Agregar el correo al claim
-            new Claim("Rol", usuario.Rol)  // Guardar el rol en una claim personalizada
-        };
+            {
+                new Claim(ClaimTypes.Name, usuario.Nombre),
+                new Claim(ClaimTypes.Email, usuario.Correo),
+                new Claim("Rol", usuario.Rol)
+            };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties();
@@ -60,49 +61,40 @@ public class CuentaController : Controller
         return View();
     }
 
-    // Creacion de  la vista de Registro    
+    // Creación de la vista de Registro
     public IActionResult Registro(string tipo)
     {
-        // Validación para asegurar que solo un administrador pueda acceder
         var userRol = User.FindFirst("Rol")?.Value;
         if (userRol != "Administrador")
         {
             return RedirectToAction("Login");
         }
 
-        // Crear un nuevo objeto Usuario
         var model = new Usuario();
-
-        // Si se recibe un parámetro "tipo" no vacío, asignarlo al modelo
         if (!string.IsNullOrEmpty(tipo))
         {
-            model.Rol = tipo;  // Asignar "Docente" si el parámetro es "Docente"
+            model.Rol = tipo;
         }
 
-        return View(model);  // Pasar el modelo con el valor predeterminado
+        return View(model);
     }
 
-
-
-
-    // Creacion de la logica que Procesa el registro de un nuevo usuario
+    // Creación de la lógica que procesa el registro de un nuevo usuario
     [HttpPost]
     public IActionResult Registro(Usuario usuario, string confirmarClave)
     {
         if (ModelState.IsValid && usuario.Clave == confirmarClave)
         {
-            // Guardar el usuario en la base de datos
             _context.Usuarios.Add(usuario);
-            _context.SaveChanges(); // Guarda el usuario primero
+            _context.SaveChanges();
 
-            // Dependiendo del rol, insertar en la tabla correspondiente
             if (usuario.Rol == "Estudiante")
             {
                 var estudiante = new Estudiante
                 {
-                    Nombre = usuario.Nombre,                    
+                    Nombre = usuario.Nombre,
                     Correo = usuario.Correo,
-                    IdUsuario = usuario.IdUsuario // Asigna el IdUsuario del usuario recién insertado
+                    IdUsuario = usuario.IdUsuario
                 };
                 _context.Estudiantes.Add(estudiante);
             }
@@ -110,9 +102,9 @@ public class CuentaController : Controller
             {
                 var docente = new Docente
                 {
-                    Nombre = usuario.Nombre,                    
+                    Nombre = usuario.Nombre,
                     Correo = usuario.Correo,
-                    IdUsuario = usuario.IdUsuario // Asigna el IdUsuario del usuario recién insertado
+                    IdUsuario = usuario.IdUsuario
                 };
                 _context.Docentes.Add(docente);
             }
@@ -120,49 +112,43 @@ public class CuentaController : Controller
             {
                 var administrador = new AcademiEnroll.Models.Administrador
                 {
-                    Nombre = usuario.Nombre,                    
+                    Nombre = usuario.Nombre,
                     Correo = usuario.Correo,
-                    IdUsuario = usuario.IdUsuario // Asigna el IdUsuario del usuario recién insertado
+                    IdUsuario = usuario.IdUsuario
                 };
                 _context.Administrador.Add(administrador);
             }
 
-            // Guardar los cambios adicionales para las tablas de roles
             _context.SaveChanges();
 
             ViewBag.Nombre = usuario.Nombre;
             ViewBag.Rol = usuario.Rol;
 
-            return View("ConfirmacionRegistro");  // Redirige a la vista de confirmación
+            return View("ConfirmacionRegistro");
         }
 
         ModelState.AddModelError("", "Error al registrar el usuario.");
         return View();
     }
 
-
-
-
-    // Creacion de la vista de confirmación tras el registro
+    // Creación de la vista de confirmación tras el registro
     public IActionResult ConfirmacionRegistro(string correo)
     {
         ViewBag.Correo = correo;
         return View();
     }
 
-    // Creacion de la vista de "Olvidé mi contraseña"
+    // Creación de la vista de "Olvidé mi contraseña"
     public IActionResult OlvidoContraseña() => View();
 
-    // Creacion de la logica para procesar la solicitud de restablecimiento de contraseña
+    // Creación de la lógica para procesar la solicitud de restablecimiento de contraseña
     [HttpPost]
     public IActionResult OlvidoContraseña(string correo)
     {
         var usuario = _context.Usuarios.SingleOrDefault(u => u.Correo == correo);
         if (usuario != null)
         {
-            // Aquí puedes generar una contraseña temporal o un enlace de restablecimiento
-            // Por ahora, vamos a simular el restablecimiento estableciendo una contraseña predeterminada.
-            usuario.Clave = "nueva_contraseña123"; // Puedes usar lógica más segura en producción
+            usuario.Clave = "nueva_contraseña123";
             _context.SaveChanges();
 
             ViewBag.Mensaje = "Se ha restablecido su contraseña. Revise su correo o use 'nueva_contraseña123' como clave temporal.";
@@ -176,33 +162,23 @@ public class CuentaController : Controller
     }
 
     // Creación de la vista de Perfil
-
-    [Authorize]  // Asegurar que solo usuarios autenticados accedan
+    [Authorize]
     public IActionResult Perfil()
     {
-        // Obtener el correo del usuario autenticado desde los claims
         var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
-
-        // Validar que el correo exista en los claims
         if (string.IsNullOrEmpty(correoUsuario))
         {
-            return RedirectToAction("Login");  // Redirigir si no está autenticado
+            return RedirectToAction("Login");
         }
 
-        // Buscar el usuario en la base de datos
         var usuario = _context.Usuarios.SingleOrDefault(u => u.Correo == correoUsuario);
-
-        // Validar que se haya encontrado el usuario
         if (usuario == null)
         {
-            return RedirectToAction("Login");  // Redirigir si no se encuentra
+            return RedirectToAction("Login");
         }
 
-        // Crear un modelo o pasar directamente el usuario
         return View(usuario);
     }
-
-
 
     // Creación de la vista para el Docente
     public IActionResult VistaDocente() => View("VistaDocente");
@@ -210,8 +186,34 @@ public class CuentaController : Controller
     // Creación de la vista para el Estudiante
     public IActionResult VistaEstudiante() => View("VistaEstudiante");
 
-    // Creación de la vista para el Administrador
-    public IActionResult VistaAdmin() => View("VistaAdmin");
+    // Creación de la vista para el Administrador (Dashboard)
+    public async Task<IActionResult> VistaAdmin()
+    {
+        var dashboardData = new DashBoard();
 
-    
+        using (var connection = (SqlConnection)_context.Database.GetDbConnection())
+        {
+            await connection.OpenAsync();
+
+            using (var command = new SqlCommand("sp_ReporteDashboard", connection))
+            {
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync())
+                    {
+                        dashboardData.TotalDocentes = reader.GetInt32(0);
+                        dashboardData.TotalEstudiantes = reader.GetInt32(1);
+                        dashboardData.TotalAprobados = reader.GetInt32(2);
+                        dashboardData.TotalReprobados = reader.GetInt32(3);
+                        dashboardData.TotalMaterias = reader.GetInt32(4);
+                        dashboardData.TotalUsuarios = reader.GetInt32(5);
+                    }
+                }
+            }
+        }
+
+        return View("VistaAdmin", dashboardData);
+    }
 }

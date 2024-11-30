@@ -2,26 +2,24 @@
 using AcademiEnroll.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-
+using System.Data;
 namespace AcademiEnroll.Controllers
 {
     public class MateriasController : Controller
     {
         private readonly AcademiEnrollContext _context;
-
         public MateriasController(AcademiEnrollContext context)
         {
             _context = context;
         }
-
         // GET: Materias
         public async Task<IActionResult> Index()
         {
             var materias = await _context.Materias.Include(m => m.Docente).ToListAsync();
             return View(materias);
         }
-
         // GET: Materias/Details/5
         public async Task<IActionResult> Details(int id)
         {
@@ -36,9 +34,11 @@ namespace AcademiEnroll.Controllers
         // GET: Materias/Create
         public IActionResult Create()
         {
-            ViewData["Docentes"] = new SelectList(_context.Docentes, "IdDocente", "IdDocente");
+            // Aquí pasamos la lista de docentes a la vista.
+            ViewBag.Docentes = new SelectList(_context.Docentes, "IdDocente", "Nombre");
             return View();
         }
+
 
         // POST: Materias/Create
         [HttpPost]
@@ -47,11 +47,17 @@ namespace AcademiEnroll.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(materia);
+                // Usar Entity Framework para agregar la materia directamente
+                _context.Materias.Add(materia);
+
+                // Guardar los cambios en la base de datos
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Docentes"] = new SelectList(_context.Docentes, "IdDocente", "IdDocente", materia.IdDocente);
+
+            // Si el modelo no es válido, volver a cargar la lista de docentes
+            ViewData["Docentes"] = new SelectList(_context.Docentes, "IdDocente", "Nombre", materia.IdDocente);
             return View(materia);
         }
 
@@ -66,7 +72,6 @@ namespace AcademiEnroll.Controllers
             ViewData["Docentes"] = new SelectList(_context.Docentes, "IdDocente", "IdDocente", materia.IdDocente);
             return View(materia);
         }
-
         // POST: Materias/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -76,7 +81,6 @@ namespace AcademiEnroll.Controllers
             {
                 return NotFound();
             }
-
             if (ModelState.IsValid)
             {
                 try
@@ -100,7 +104,6 @@ namespace AcademiEnroll.Controllers
             ViewData["Docentes"] = new SelectList(_context.Docentes, "IdDocente", "IdDocente", materia.IdDocente);
             return View(materia);
         }
-
         // POST: Materias/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -116,7 +119,3 @@ namespace AcademiEnroll.Controllers
         }
     }
 }
-
-
-
-

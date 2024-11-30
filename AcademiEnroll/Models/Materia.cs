@@ -16,7 +16,7 @@ namespace AcademiEnroll.Models
         [Required]
         [Display(Name = "Docente")]
         public int IdDocente { get; set; }
-        
+
         public Docente? Docente { get; set; }
     }
 }
