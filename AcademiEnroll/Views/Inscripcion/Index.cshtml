@@ -5,6 +5,21 @@
 
 <h2>Materias Disponibles</h2>
 
+<!-- Mensajes de error o éxito -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
 <table class="table">
     <thead>
         <tr>
@@ -24,11 +39,18 @@
                 <td>
                     @if (inscripciones.Any(i => i.IdMateria == materia.Id))
                     {
-                        <span>Ya Inscrito</span>
+
+                        <a href="@Url.Action("Details", "Inscripcion", new { id = materia.Id })" class="btn btn-info">Ver Detalles</a>
+
+
+                        <form method="post" asp-action="Retirar" asp-route-id="@materia.Id" style="display:inline;" onsubmit="return confirm('¿Está seguro de retirar esta materia?');">
+                            <button type="submit" class="btn btn-danger">Retirar</button>
+                        </form>
                     }
                     else
                     {
-                        <form method="post" asp-action="Inscribir" asp-route-id="@materia.Id">
+                        <!-- Botón para inscribirse en la materia -->
+                        <form method="post" asp-action="Inscribir" asp-route-id="@materia.Id" style="display:inline;">
                             <button type="submit" class="btn btn-primary">Inscribir</button>
                         </form>
                     }
@@ -37,3 +59,5 @@
         }
     </tbody>
 </table>
+
+

@@ -1,7 +1,6 @@
 ﻿using AcademiEnroll.Data;
 using AcademiEnroll.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,7 +43,6 @@ namespace AcademiEnroll.Controllers
         }
 
         // GET: Inscripcion/Details/5
-        // GET: Inscripcion/Details/5
         public async Task<IActionResult> Details(int id)
         {
             // Obtener la materia de la base de datos
@@ -81,12 +79,9 @@ namespace AcademiEnroll.Controllers
             return View(materia); // Solo muestra la materia (no la inscripción si no está inscrito)
         }
 
-
-        // POST: Inscripcion/Inscribir/5
-        // POST: Inscripcion/Inscribir/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Inscribir(int id)
+        public async Task<IActionResult> Retirar(int id)
         {
             var usuarioIdEstudiante = User.Claims.FirstOrDefault(c => c.Type == "IdEstudiante")?.Value;
 
@@ -97,16 +92,61 @@ namespace AcademiEnroll.Controllers
 
             var estudianteId = int.Parse(usuarioIdEstudiante);
 
-            // Verificar si el estudiante ya está inscrito
+            // Buscar la inscripción correspondiente
+            var inscripcion = await _context.Inscripciones
+                .FirstOrDefaultAsync(i => i.IdEstudiante == estudianteId && i.IdMateria == id);
+
+            if (inscripcion == null)
+            {
+                TempData["Error"] = "No estás inscrito en esta materia.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Eliminar la inscripción
+            _context.Inscripciones.Remove(inscripcion);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Materia retirada con éxito.";
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        // POST: Inscripcion/Inscribir/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Inscribir(int id)
+        {
+            var usuarioIdEstudiante = User.Claims.FirstOrDefault(c => c.Type == "IdEstudiante")?.Value;
+
+            if (usuarioIdEstudiante == null)
+            {
+                return Unauthorized(); // El usuario no es un estudiante
+            }
+
+            var estudianteId = int.Parse(usuarioIdEstudiante);
+
+            // Verificar cuántas materias tiene inscritas el estudiante
+            var cantidadInscritas = await _context.Inscripciones
+                .CountAsync(i => i.IdEstudiante == estudianteId);
+
+            // Limitar a 5 materias
+            if (cantidadInscritas >= 5)
+            {
+                TempData["Error"] = "Ya has alcanzado el máximo de 5 materias inscritas.";
+                return RedirectToAction(nameof(Index)); // Redirige a la página de inscripción con mensaje
+            }
+
+            // Verificar si el estudiante ya está inscrito en esta materia
             var existenciaInscripcion = await _context.Inscripciones
                 .FirstOrDefaultAsync(i => i.IdEstudiante == estudianteId && i.IdMateria == id);
 
             if (existenciaInscripcion != null)
             {
-                return RedirectToAction(nameof(Index)); // Si ya está inscrito, redirige
+                TempData["Error"] = "Ya estás inscrito en esta materia.";
+                return RedirectToAction(nameof(Details), new { id = id }); // Si ya está inscrito, redirige
             }
 
-            // Crear la nueva inscripción (no necesitas el campo Codigo)
+            // Crear la nueva inscripción
             var inscripcion = new Inscripciones
             {
                 IdEstudiante = estudianteId,
@@ -116,9 +156,8 @@ namespace AcademiEnroll.Controllers
             _context.Inscripciones.Add(inscripcion);
             await _context.SaveChangesAsync();
 
+            TempData["Success"] = "Te has inscrito exitosamente en la materia.";
             return RedirectToAction(nameof(Details), new { id = id });
         }
     }
 }
-
-
