@@ -1,0 +1,39 @@
+﻿@model IEnumerable<AcademiEnroll.Models.Materia>
+@{
+    var inscripciones = ViewBag.Inscripciones as List<AcademiEnroll.Models.Inscripciones>;
+}
+
+<h2>Materias Disponibles</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Código</th>
+            <th>Docente</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var materia in Model)
+        {
+            <tr>
+                <td>@materia.Nombre</td>
+                <td>@materia.Codigo</td>
+                <td>@materia.Docente.Nombre</td>
+                <td>
+                    @if (inscripciones.Any(i => i.IdMateria == materia.Id))
+                    {
+                        <span>Ya Inscrito</span>
+                    }
+                    else
+                    {
+                        <form method="post" asp-action="Inscribir" asp-route-id="@materia.Id">
+                            <button type="submit" class="btn btn-primary">Inscribir</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

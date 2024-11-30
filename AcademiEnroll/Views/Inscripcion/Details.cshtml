@@ -1,0 +1,28 @@
+﻿@model AcademiEnroll.Models.Materia
+
+<h2>Detalles de la Materia</h2>
+
+<div>
+    <h3>@Model.Nombre</h3>
+    <p>Código de la Materia: @Model.Codigo</p>
+
+    @if (Model.Docente != null)
+    {
+        <p>Docente: @Model.Docente.Nombre</p>
+    }
+    else
+    {
+        <p>Docente: No asignado</p>
+    }
+</div>
+
+@if (ViewBag.CodInscripcion != null)
+{
+    <div>
+        <h4>Detalles de la Inscripción</h4>
+        <p>Código de Inscripción: @ViewBag.CodInscripcion</p>
+        <p>Fecha de Inscripción: @ViewBag.FechaInscripcion</p>
+    </div>
+}
+
+<a href="@Url.Action("Index", "Inscripcion")">Volver a la lista de materias</a>

@@ -50,6 +50,16 @@ public class CuentaController : Controller
                 }
             }
 
+            // Si el usuario es Estudiante, agregar IdEstudiante al claim
+            if (usuario.Rol == "Estudiante")
+            {
+                var estudiante = _context.Estudiantes.SingleOrDefault(d => d.Correo == correo);
+                if (estudiante != null)
+                {
+                    claims.Add(new Claim("IdEstudiante", estudiante.IdEstudiante.ToString()));
+                }
+            }
+
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties();
 

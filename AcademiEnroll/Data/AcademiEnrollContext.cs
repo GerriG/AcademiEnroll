@@ -16,6 +16,7 @@ namespace AcademiEnroll.Data
         public DbSet<Models.Administrador> Administrador { get; set; }
         public DbSet<Materia> Materias { get; set; }
         public DbSet<Nota> Notas { get; set; }
+        public DbSet<Inscripciones> Inscripciones { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +31,20 @@ namespace AcademiEnroll.Data
                 .WithMany()
                 .HasForeignKey(m => m.IdDocente)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación entre Inscripcion y Estudiante
+            modelBuilder.Entity<Inscripciones>()
+                .HasOne(i => i.Estudiante)
+                .WithMany()  // Relación de uno a muchos, un estudiante puede tener muchas inscripciones
+                .HasForeignKey(i => i.IdEstudiante)
+                .OnDelete(DeleteBehavior.Cascade);  // Eliminación en cascada cuando se elimina un estudiante
+
+            // Relación entre Inscripcion y Materia
+            modelBuilder.Entity<Inscripciones>()
+                .HasOne(i => i.Materia)
+                .WithMany()  // Relación de uno a muchos, una materia puede tener muchas inscripciones
+                .HasForeignKey(i => i.IdMateria)
+                .OnDelete(DeleteBehavior.Cascade);  // Eliminación en cascada cuando se elimina una materia
         }
 
         // Método para ejecutar un procedimiento almacenado para el Dashboard usando EF Core
