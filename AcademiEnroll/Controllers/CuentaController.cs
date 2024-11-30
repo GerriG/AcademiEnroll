@@ -40,6 +40,16 @@ public class CuentaController : Controller
                 new Claim("Rol", usuario.Rol)
             };
 
+            // Si el usuario es Docente, agregar IdDocente al claim
+            if (usuario.Rol == "Docente")
+            {
+                var docente = _context.Docentes.SingleOrDefault(d => d.Correo == correo);
+                if (docente != null)
+                {
+                    claims.Add(new Claim("IdDocente", docente.IdDocente.ToString()));
+                }
+            }
+
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties();
 

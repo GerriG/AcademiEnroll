@@ -30,9 +30,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="IdDocente" class="control-label"></label>
-                <input asp-for="IdDocente" class="form-control" />
+                <select asp-for="IdDocente" class="form-control" asp-items="@(ViewBag.Docentes)">
+                    <option value="">Seleccione un Docente</option>
+                </select>
                 <span asp-validation-for="IdDocente" class="text-danger"></span>
             </div>
+            <br>
             <div class="form-group">
                 <input type="submit" value="Actualizar" class="btn btn-primary" />
                 <a asp-action="Index" class="btn btn-warning">Volver al Listado</a>

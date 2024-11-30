@@ -8,13 +8,15 @@ namespace AcademiEnroll.Models
         public int Id { get; set; }
 
         [Required]
+        [Display(Name = "Materia y Horario")]
         public string Nombre { get; set; }
 
         [Required]
+        [Display(Name = "Codigo Materia")]
         public string Codigo { get; set; }
 
         [Required]
-        [Display(Name = "Docente")]
+        [Display(Name = "Docente de Materia")]
         public int IdDocente { get; set; }
 
         public Docente? Docente { get; set; }

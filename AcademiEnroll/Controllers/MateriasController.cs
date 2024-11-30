@@ -64,14 +64,20 @@ namespace AcademiEnroll.Controllers
         // GET: Materias/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var materia = await _context.Materias.FindAsync(id);
+            var materia = await _context.Materias.Include(m => m.Docente)
+                                                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (materia == null)
             {
                 return NotFound();
             }
-            ViewData["Docentes"] = new SelectList(_context.Docentes, "IdDocente", "IdDocente", materia.IdDocente);
+
+            // Pasamos la lista de docentes al ViewBag
+            ViewBag.Docentes = new SelectList(_context.Docentes, "IdDocente", "Nombre", materia.IdDocente);
+
             return View(materia);
         }
+
         // POST: Materias/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -81,6 +87,7 @@ namespace AcademiEnroll.Controllers
             {
                 return NotFound();
             }
+
             if (ModelState.IsValid)
             {
                 try
@@ -90,7 +97,7 @@ namespace AcademiEnroll.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!_context.Materias.Any(e => e.Id == id))
+                    if (!MateriaExists(materia.Id))
                     {
                         return NotFound();
                     }
@@ -101,9 +108,17 @@ namespace AcademiEnroll.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["Docentes"] = new SelectList(_context.Docentes, "IdDocente", "IdDocente", materia.IdDocente);
+
+            // Si hubo un error, se pasa nuevamente la lista de docentes al ViewBag
+            ViewBag.Docentes = new SelectList(_context.Docentes, "IdDocente", "Nombre", materia.IdDocente);
             return View(materia);
         }
+
+        private bool MateriaExists(int id)
+        {
+            return _context.Materias.Any(e => e.Id == id);
+        }
+
         // POST: Materias/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]

@@ -151,6 +151,13 @@ namespace AcademiEnroll.Controllers
                 return Unauthorized(); // o redirigir al acceso denegado si lo prefieres
             }
 
+            // Obtener el IdDocente del claim
+            var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
+            if (string.IsNullOrEmpty(idDocenteClaim) || !int.TryParse(idDocenteClaim, out var idDocente))
+            {
+                return Unauthorized("No se encontró el Id del docente.");
+            }
+
             // Obtener los nombres de los estudiantes
             var estudiantes = await _context.Estudiantes
                 .Select(e => e.Nombre)
@@ -158,8 +165,9 @@ namespace AcademiEnroll.Controllers
 
             // Obtener los nombres de las asignaturas
             var asignaturas = await _context.Materias
-                .Select(m => m.Nombre)
-                .ToListAsync();
+            .Where(m => m.IdDocente == idDocente) // Filtrar por IdDocente
+            .Select(m => m.Nombre)               // Seleccionar solo los nombres
+            .ToListAsync();
 
             // Pasar los datos al ViewBag
             ViewBag.Estudiantes = new SelectList(estudiantes);
