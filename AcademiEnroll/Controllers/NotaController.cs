@@ -58,7 +58,7 @@ namespace AcademiEnroll.Controllers
 
             // Si es un Administrador (o cualquier otro rol), devolver todas las notas
             var todasLasNotas = await _context.Notas
-                .OrderByDescending(n => n.Id) // Ordenar de más reciente a más antiguo por ID (equivalente a ORDER BY Id DESC)
+                .OrderBy(n => n.Id) // Ordenar de más reciente a más antiguo por ID (equivalente a ORDER BY Id DESC)
                 .ToListAsync();
 
             ViewBag.EsDocente = false;  // No es Docente
