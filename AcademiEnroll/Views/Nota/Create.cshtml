@@ -12,18 +12,20 @@
         <form asp-action="Create" method="post">
             <div class="form-group">
                 <label asp-for="NombreEstudiante" class="form-label"></label>
-                <select asp-for="NombreEstudiante" class="form-control" asp-items="ViewBag.Estudiantes">
+                <select id="selectEstudiante" asp-for="NombreEstudiante" class="form-control" asp-items="ViewBag.Estudiantes">
                     <option value="">-- Seleccione un estudiante --</option>
                 </select>
                 <span asp-validation-for="NombreEstudiante" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="NombreAsignatura" class="control-label"></label>
-                <select asp-for="NombreAsignatura" class="form-control" asp-items="@(ViewBag.Asignaturas)">
+                <select id="selectMaterias" asp-for="NombreAsignatura" class="form-control">
                     <option value="">Seleccione una Asignatura</option>
                 </select>
                 <span asp-validation-for="NombreAsignatura" class="text-danger"></span>
             </div>
+
 
             <div class="form-group">
                 <label asp-for="Calificacion" class="form-label"></label>
@@ -38,5 +40,31 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById("selectEstudiante").addEventListener("change", function () {
+            const estudianteId = this.value;
+            const materiasDropdown = document.getElementById("selectMaterias");
+
+            if (estudianteId) {
+                fetch(`/Nota/GetMateriasPorEstudiante?estudianteId=${estudianteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        materiasDropdown.innerHTML = '<option value="">Seleccione una Asignatura</option>';
+                        data.forEach(materia => {
+                            const option = document.createElement("option");
+                            option.value = materia.id;
+                            option.textContent = materia.nombre;
+                            materiasDropdown.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error("Error al obtener materias:", error));
+            } else {
+                materiasDropdown.innerHTML = '<option value="">Seleccione una Asignatura</option>';
+            }
+        });
+    </script>
 }
+
+
 

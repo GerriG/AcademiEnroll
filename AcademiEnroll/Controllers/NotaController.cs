@@ -142,39 +142,31 @@ namespace AcademiEnroll.Controllers
         // GET: NotaController/Create
         public async Task<ActionResult> Create()
         {
-            // Verificar el rol del usuario en el controlador
             var rol = User.FindFirst("Rol")?.Value;
 
-            // Si no es un administrador, retornar Unauthorized
             if (rol != "Docente")
             {
-                return Unauthorized(); // o redirigir al acceso denegado si lo prefieres
+                return Unauthorized();
             }
 
-            // Obtener el IdDocente del claim
             var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
             if (string.IsNullOrEmpty(idDocenteClaim) || !int.TryParse(idDocenteClaim, out var idDocente))
             {
                 return Unauthorized("No se encontró el Id del docente.");
             }
 
-            // Obtener los nombres de los estudiantes
-            var estudiantes = await _context.Estudiantes
-                .Select(e => e.Nombre)
+            // Obtener los estudiantes inscritos en materias impartidas por el docente actual
+            var estudiantes = await _context.Inscripciones
+                .Where(i => i.Materia.IdDocente == idDocente)
+                .Select(i => i.Estudiante)
+                .Distinct()
                 .ToListAsync();
 
-            // Obtener los nombres de las asignaturas
-            var asignaturas = await _context.Materias
-            .Where(m => m.IdDocente == idDocente) // Filtrar por IdDocente
-            .Select(m => m.Nombre)               // Seleccionar solo los nombres
-            .ToListAsync();
-
-            // Pasar los datos al ViewBag
-            ViewBag.Estudiantes = new SelectList(estudiantes);
-            ViewBag.Asignaturas = new SelectList(asignaturas);
+            ViewBag.Estudiantes = new SelectList(estudiantes, "IdEstudiante", "Nombre");
 
             return View();
         }
+
 
         // POST: NotaController/Create
         [HttpPost]
@@ -207,6 +199,32 @@ namespace AcademiEnroll.Controllers
 
             return View(nota);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMateriasPorEstudiante(int estudianteId)
+        {
+            var rol = User.FindFirst("Rol")?.Value;
+
+            if (rol != "Docente")
+            {
+                return Unauthorized();
+            }
+
+            var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
+            if (string.IsNullOrEmpty(idDocenteClaim) || !int.TryParse(idDocenteClaim, out var idDocente))
+            {
+                return Unauthorized("No se encontró el Id del docente.");
+            }
+
+            // Filtrar materias inscritas por el estudiante bajo el docente actual
+            var materias = await _context.Inscripciones
+                .Where(i => i.IdEstudiante == estudianteId && i.Materia.IdDocente == idDocente)
+                .Select(i => new { i.Materia.Id, i.Materia.Nombre })
+                .ToListAsync();
+
+            return Json(materias);
+        }
+
 
         // GET: Nota/Delete/
         public async Task<IActionResult> Delete(int id)
