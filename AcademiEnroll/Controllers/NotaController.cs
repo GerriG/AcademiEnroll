@@ -20,6 +20,12 @@ namespace AcademiEnroll.Controllers
         // GET: NotaController
         public async Task<IActionResult> Index()
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }            
+
             // Obtener el rol del usuario desde el claim
             var rol = User.FindFirst("Rol")?.Value;
             var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value; // Obtener el nombre del usuario (si es necesario)
@@ -71,6 +77,12 @@ namespace AcademiEnroll.Controllers
         // GET: NotaController/Details/5
         public async Task<ActionResult> Details(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }            
+
             // Buscar la nota por su id
             var nota = await _context.Notas.FindAsync(id);
 
@@ -91,6 +103,18 @@ namespace AcademiEnroll.Controllers
         // GET: NotaController/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             // Verificar el rol del usuario en el controlador
             var rol = User.FindFirst("Rol")?.Value;
 
@@ -157,11 +181,16 @@ namespace AcademiEnroll.Controllers
         // GET: NotaController/Create
         public async Task<ActionResult> Create()
         {
-            var rol = User.FindFirst("Rol")?.Value;
-
-            if (rol != "Docente")
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
             {
-                return Unauthorized();
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Docente")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Docente.");
             }
 
             var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
@@ -245,6 +274,18 @@ namespace AcademiEnroll.Controllers
         [HttpGet]
         public async Task<IActionResult> GetMateriasPorEstudiante(int estudianteId)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Docente")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Docente.");
+            }
+
             var rol = User.FindFirst("Rol")?.Value;
 
             if (rol != "Docente")
@@ -271,6 +312,18 @@ namespace AcademiEnroll.Controllers
         // GET: Nota/Delete/
         public async Task<IActionResult> Delete(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             // Aquí se asegura que el usuario tiene el rol adecuado
             var rol = User.FindFirst("Rol")?.Value;
             if (rol != "Administrador")

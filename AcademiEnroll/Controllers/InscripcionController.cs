@@ -20,6 +20,8 @@ namespace AcademiEnroll.Controllers
         // GET: Inscripcion/Index
         public async Task<IActionResult> Index()
         {
+            
+            
             // Obtener el Id del Estudiante desde los claims
             var usuarioIdEstudiante = User.Claims.FirstOrDefault(c => c.Type == "IdEstudiante")?.Value;
 

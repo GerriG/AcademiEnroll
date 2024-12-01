@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AcademiEnroll.Controllers
 {
@@ -29,6 +31,12 @@ namespace AcademiEnroll.Controllers
 
         public IActionResult Index()
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login");
+            }            
+
             return View();
         }
 

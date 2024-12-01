@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Security.Claims;
 namespace AcademiEnroll.Controllers
 {
     public class MateriasController : Controller
@@ -17,12 +18,24 @@ namespace AcademiEnroll.Controllers
         // GET: Materias
         public async Task<IActionResult> Index()
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
             var materias = await _context.Materias.Include(m => m.Docente).ToListAsync();
             return View(materias);
         }
         // GET: Materias/Details/5
         public async Task<IActionResult> Details(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
             var materia = await _context.Materias.Include(m => m.Docente).FirstOrDefaultAsync(m => m.Id == id);
             if (materia == null)
             {
@@ -34,6 +47,12 @@ namespace AcademiEnroll.Controllers
         // GET: Materias/Create
         public IActionResult Create()
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
             // Aquí pasamos la lista de docentes a la vista.
             ViewBag.Docentes = new SelectList(_context.Docentes, "IdDocente", "Nombre");
             return View();
@@ -64,6 +83,18 @@ namespace AcademiEnroll.Controllers
         // GET: Materias/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             var materia = await _context.Materias.Include(m => m.Docente)
                                                  .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -124,6 +155,12 @@ namespace AcademiEnroll.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             var materia = await _context.Materias.FindAsync(id);
             if (materia != null)
             {

@@ -1,6 +1,7 @@
 ﻿using AcademiEnroll.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Administrador.Controllers
@@ -17,6 +18,18 @@ namespace Administrador.Controllers
         // GET: EstudianteController
         public async Task<ActionResult> Index()
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             var estudiantes = await _mantenimientoEstudiante.ListarTodos();
             return View(estudiantes);
         }
@@ -24,6 +37,18 @@ namespace Administrador.Controllers
         // GET: EstudianteController/Details/5
         public async Task<ActionResult> Details(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             var estudiante = await _mantenimientoEstudiante.Consultar(id);
             return View(estudiante);
         }
@@ -31,7 +56,19 @@ namespace Administrador.Controllers
         // GET: EstudianteController/Create
         public ActionResult Create()
         {
-			return RedirectToAction("Registro", "Cuenta");
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
+            return RedirectToAction("Registro", "Cuenta");
 		}
 
         // POST: EstudianteController/Create
@@ -61,6 +98,18 @@ namespace Administrador.Controllers
         // GET: EstudianteController/Edit/5
         public async Task<ActionResult> Edit(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             var estudiante = await _mantenimientoEstudiante.Consultar(id);
             return View(estudiante);
         }
@@ -93,6 +142,18 @@ namespace Administrador.Controllers
         // GET: EstudianteController/Delete/5
         public async Task<ActionResult> Delete(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             var estudiante = await _mantenimientoEstudiante.Consultar(id);
             return View(estudiante);
         }
