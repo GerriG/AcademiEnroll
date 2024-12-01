@@ -93,25 +93,28 @@ namespace Administrador.Controllers
         }
 
         // GET: UsuarioController/Delete/5
-        public async Task<ActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var usuario = await _mantenimientoUsuario.Consultar(id);
-            return View(usuario);
+            if (usuario == null)
+            {
+                return NotFound();
+            }
+            return Json(new { success = true, usuarioId = usuario.IdUsuario });
         }
 
-        // POST: UsuarioController/Delete/5
+        // POST: UsuarioController/DeleteConfirmed/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try
             {
                 await _mantenimientoUsuario.Borrar(id);
-                return RedirectToAction(nameof(Index));
+                return Json(new { success = true });
             }
             catch
             {
-                return View();
+                return Json(new { success = false, message = "Hubo un error al eliminar el usuario." });
             }
         }
     }

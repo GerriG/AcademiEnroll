@@ -2,19 +2,32 @@
 
 @{
     ViewData["Title"] = "Perfil de Usuario";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+      <!-- Si estás usando un layout común -->
 }
 
-<h2>Perfil de Usuario</h2>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Tarjeta de Perfil de Usuario -->
+            <div class="card shadow-lg">
+                <div class="card-body text-center">
+                    <!-- Título del perfil -->
+                    <h3 class="card-title text-dark">Bienvenido, @Model.Nombre</h3>
+                    <p class="card-text text-muted">Aquí puedes ver tu perfil y cerrar sesión</p>
 
-<div>
-    <h3>Bienvenido, @Model.Nombre</h3>
-    <ul>
-        <li><strong>Correo:</strong> @Model.Correo</li>
-        <li><strong>Rol:</strong> @Model.Rol</li>
-    </ul>
+                    <!-- Detalles del usuario -->
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><strong>Correo:</strong> @Model.Correo</li>
+                        <li class="mb-2"><strong>Rol:</strong> @Model.Rol</li>
+                    </ul>
+
+                    <!-- Botón para cerrar sesión -->
+                    <form method="post" asp-controller="Home" asp-action="Salir" class="d-inline">
+                        <button type="submit" class="btn btn-danger">Cerrar sesión</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<form method="post" asp-controller="Home" asp-action="Salir" class="d-inline">
-    <button type="submit" class="btn btn-danger">Cerrar sesión</button>
-</form>
-

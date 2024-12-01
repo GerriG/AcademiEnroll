@@ -110,18 +110,38 @@ namespace Administrador.Controllers
 			return View(docente);
 		}
 
-		// POST: DocenteController/Delete/5
-		[HttpPost, ActionName("Delete")]
-		[ValidateAntiForgeryToken]
-		public async Task<ActionResult> DeleteConfirmed(int id)
-		{
-			var docente = await _context.Docentes.FindAsync(id);
-			_context.Docentes.Remove(docente);
-			await _context.SaveChangesAsync();
-			return RedirectToAction(nameof(Index));
-		}
+        // POST: DocenteController/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> DeleteConfirmed(int id)
+        {
+            // Encuentra el registro del docente por su Id
+            var docente = await _context.Docentes.FindAsync(id);
 
-		private bool DocenteExists(int id)
+            if (docente == null)
+            {
+                return NotFound();
+            }
+
+            // Encuentra el registro relacionado en Usuarios
+            var usuario = await _context.Usuarios.FindAsync(docente.IdUsuario);
+
+            if (usuario == null)
+            {
+                return BadRequest("El usuario asociado al docente no fue encontrado.");
+            }
+
+            // Elimina el registro en Usuarios (esto eliminará en cascada el registro de Docentes)
+            _context.Usuarios.Remove(usuario);
+
+            // Guarda los cambios en la base de datos
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        private bool DocenteExists(int id)
 		{
 			return _context.Docentes.Any(e => e.IdDocente == id);
 		}

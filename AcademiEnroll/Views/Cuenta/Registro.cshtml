@@ -1,12 +1,9 @@
-﻿@{
-    ViewData["Title"] = "Registro";
-}
-
+﻿@model Usuario
 @{
+    ViewData["Title"] = "Registro";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@model Usuario
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,6 +12,7 @@
     <title>Registro de Usuario</title>
     <link href="~/css/login.css" rel="stylesheet" />
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <section class="bg-transparent py-3 py-md-5">
@@ -68,7 +66,7 @@
                                         <div class="d-grid my-3">
                                             <button type="submit" class="btn btn-success btn-lg">Registrar</button>
                                         </div>
-                                    </div>                                    
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -77,5 +75,34 @@
             </div>
         </div>
     </section>
+
+    <script>
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '@TempData["ErrorMessage"]',
+                    });
+            </text>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Usuario Agregado',
+                        text: '@TempData["SuccessMessage"]',
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK',
+                        // Después de hacer clic en "OK", redirigir a la vista deseada
+                        willClose: () => {
+                            window.location.href = '@Url.Action("Index", "Usuario")';
+                        }
+                    });
+            </text>
+        }
+    </script>
 </body>
 </html>

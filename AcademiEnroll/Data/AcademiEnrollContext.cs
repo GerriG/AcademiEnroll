@@ -25,6 +25,56 @@ namespace AcademiEnroll.Data
             modelBuilder.Entity<Estudiante>().HasKey(e => e.IdEstudiante);
             modelBuilder.Entity<Models.Administrador>().HasKey(e => e.IdAdministrador);
 
+            // Clave primaria para Usuario
+            modelBuilder.Entity<Usuario>().HasKey(u => u.IdUsuario);
+
+            // Relación Usuario -> Docente (uno a uno, sin propiedad de navegación)
+            modelBuilder.Entity<Docente>()
+                .HasOne<Usuario>() // Relación con Usuario
+                .WithOne() // Sin propiedad de navegación
+                .HasForeignKey<Docente>(d => d.IdUsuario) // FK en Docente
+                .OnDelete(DeleteBehavior.Cascade); // Eliminación en cascada
+
+            // Relación Usuario -> Estudiante (uno a uno, sin propiedad de navegación)
+            modelBuilder.Entity<Estudiante>()
+                .HasOne<Usuario>()
+                .WithOne()
+                .HasForeignKey<Estudiante>(e => e.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación Usuario -> Administrador (uno a uno, sin propiedad de navegación)
+            modelBuilder.Entity<Models.Administrador>()
+                .HasOne<Usuario>()
+                .WithOne()
+                .HasForeignKey<Models.Administrador>(a => a.IdUsuario)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Claves primarias para Docente, Estudiante, Administrador
+            modelBuilder.Entity<Docente>().HasKey(d => d.IdDocente);
+            modelBuilder.Entity<Estudiante>().HasKey(e => e.IdEstudiante);
+            modelBuilder.Entity<Models.Administrador>().HasKey(a => a.IdAdministrador);
+
+            // Relación Materia -> Docente (muchos a uno)
+            modelBuilder.Entity<Materia>()
+                .HasOne(m => m.Docente)
+                .WithMany()
+                .HasForeignKey(m => m.IdDocente)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación Inscripciones -> Estudiante
+            modelBuilder.Entity<Inscripciones>()
+                .HasOne(i => i.Estudiante)
+                .WithMany()
+                .HasForeignKey(i => i.IdEstudiante)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación Inscripciones -> Materia
+            modelBuilder.Entity<Inscripciones>()
+                .HasOne(i => i.Materia)
+                .WithMany()
+                .HasForeignKey(i => i.IdMateria)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Relación Materia -> Usuario (Docente)
             modelBuilder.Entity<Materia>()
                 .HasOne(m => m.Docente)

@@ -104,7 +104,26 @@ namespace Administrador.Controllers
         {
             try
             {
-                await _mantenimientoEstudiante.Borrar(id);
+                // Obtener el estudiante por su Id
+                var estudiante = await _mantenimientoEstudiante.Consultar(id);
+
+                if (estudiante == null)
+                {
+                    return NotFound("El estudiante no fue encontrado.");
+                }
+
+                // Obtener el IdUsuario asociado al estudiante
+                var idUsuario = estudiante.IdUsuario;
+
+                // Validar que el IdUsuario exista antes de intentar eliminarlo
+                if (idUsuario <= 0)
+                {
+                    return BadRequest("El usuario asociado al estudiante no es válido.");
+                }
+
+                // Eliminar el usuario en la tabla Usuarios (esto elimina en cascada el estudiante)
+                await _mantenimientoEstudiante.BorrarUsuario(idUsuario);
+
                 return RedirectToAction(nameof(Index));
             }
             catch

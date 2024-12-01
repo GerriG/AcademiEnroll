@@ -48,6 +48,17 @@ namespace AcademiEnroll.Models
             }
             return 0;
         }
+
+        public async Task BorrarUsuario(int idUsuario)
+        {
+            var usuario = await _context.Usuarios.FindAsync(idUsuario);
+
+            if (usuario != null)
+            {
+                _context.Usuarios.Remove(usuario);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
 

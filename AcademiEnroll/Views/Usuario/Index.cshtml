@@ -4,6 +4,7 @@
     ViewData["Title"] = "Usuarios Registrados";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 @section Estilos {
     <link href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.css" rel="stylesheet" />
 
@@ -68,9 +69,10 @@
                     <a asp-action="Details" asp-route-id="@item.IdUsuario" class="btn btn-info btn-sm" title="Detalles">
                         <i class="fas fa-info-circle"></i> Detalles
                     </a>
-                    <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-danger btn-sm text-white" title="Eliminar">
+                    <!-- Botón de eliminar con SweetAlert -->
+                    <button class="btn btn-danger btn-sm text-white" title="Eliminar" onclick="confirmarEliminacion(@item.IdUsuario)">
                         <i class="fas fa-trash"></i> Eliminar
-                    </a>
+                    </button>
                 </td>
             </tr>
         }
@@ -86,6 +88,8 @@
     <script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.print.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function () {
@@ -119,5 +123,50 @@
                 ]
             });
         });
+
+        // Función para confirmar la eliminación con SweetAlert
+        function confirmarEliminacion(id) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteConfirmed", "Usuario")/' + id,
+                        type: 'POST',
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Eliminado!',
+                                    'El usuario ha sido eliminado correctamente.',
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    'Hubo un problema al eliminar al usuario.',
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function() {
+                            Swal.fire(
+                                'Error!',
+                                'Hubo un problema al procesar la solicitud.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        }
     </script>
 }

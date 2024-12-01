@@ -105,9 +105,19 @@ public class CuentaController : Controller
     {
         if (ModelState.IsValid && usuario.Clave == confirmarClave)
         {
+            // Verificar si el correo ya está registrado
+            var usuarioExistente = _context.Usuarios.SingleOrDefault(u => u.Correo == usuario.Correo);
+            if (usuarioExistente != null)
+            {
+                TempData["ErrorMessage"] = "Este correo electrónico ya está registrado.";
+                return View(usuario); // Si ya existe, muestra el error
+            }
+
+            // Registrar al usuario en la base de datos
             _context.Usuarios.Add(usuario);
             _context.SaveChanges();
 
+            // Aquí puedes agregar otros roles si es necesario
             if (usuario.Rol == "Estudiante")
             {
                 var estudiante = new Estudiante
@@ -141,20 +151,15 @@ public class CuentaController : Controller
 
             _context.SaveChanges();
 
-            ViewBag.Nombre = usuario.Nombre;
-            ViewBag.Rol = usuario.Rol;
+            // Guardar el mensaje de éxito en TempData
+            TempData["SuccessMessage"] = "Usuario agregado exitosamente.";
 
-            return View("ConfirmacionRegistro");
+            // No redirigir, simplemente recargar la vista de registro con el mensaje de éxito
+            return View();
         }
 
+        // Si no pasa la validación
         ModelState.AddModelError("", "Error al registrar el usuario.");
-        return View();
-    }
-
-    // Creación de la vista de confirmación tras el registro
-    public IActionResult ConfirmacionRegistro(string correo)
-    {
-        ViewBag.Correo = correo;
         return View();
     }
 
