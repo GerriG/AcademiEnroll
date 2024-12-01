@@ -28,6 +28,7 @@ namespace AcademiEnroll.Controllers
             if (rol == "Docente")
             {
                 var notasDocente = await _context.Notas
+                    .OrderByDescending(n => n.Id) // Ordenar de más reciente a más antiguo por ID (equivalente a ORDER BY Id DESC)
                     .Select(n => new Nota
                     {
                         Id = n.Id,
@@ -47,6 +48,7 @@ namespace AcademiEnroll.Controllers
             {
                 var notasEstudiante = await _context.Notas
                     .Where(n => n.NombreEstudiante == usuarioNombre)
+                    .OrderByDescending(n => n.Id) // Ordenar de más reciente a más antiguo por ID (equivalente a ORDER BY Id DESC)
                     .ToListAsync();
 
                 ViewBag.EsDocente = false;  // No es Docente
@@ -55,11 +57,16 @@ namespace AcademiEnroll.Controllers
             }
 
             // Si es un Administrador (o cualquier otro rol), devolver todas las notas
-            var todasLasNotas = await _context.Notas.ToListAsync();
+            var todasLasNotas = await _context.Notas
+                .OrderByDescending(n => n.Id) // Ordenar de más reciente a más antiguo por ID (equivalente a ORDER BY Id DESC)
+                .ToListAsync();
+
             ViewBag.EsDocente = false;  // No es Docente
             ViewBag.EsAdministrador = true;  // Es Administrador
             return View(todasLasNotas);
         }
+
+
 
         // GET: NotaController/Details/5
         public async Task<ActionResult> Details(int id)
@@ -173,6 +180,7 @@ namespace AcademiEnroll.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create([Bind("NombreEstudiante,NombreAsignatura,Calificacion")] Nota nota)
         {
+            // Validación de la calificación
             if (nota.Calificacion < 0 || nota.Calificacion > 10)
             {
                 // Agregar mensaje de error al ModelState
@@ -181,24 +189,50 @@ namespace AcademiEnroll.Controllers
 
             if (ModelState.IsValid)
             {
+                // Obtener el nombre del estudiante usando su ID
+                var estudiante = await _context.Estudiantes
+                    .Where(e => e.IdEstudiante == int.Parse(nota.NombreEstudiante)) // NombreEstudiante contiene el ID
+                    .Select(e => e.Nombre)
+                    .FirstOrDefaultAsync();
+
+                // Obtener el nombre de la asignatura usando su ID
+                var materia = await _context.Materias
+                    .Where(m => m.Id == int.Parse(nota.NombreAsignatura)) // NombreAsignatura contiene el ID
+                    .Select(m => m.Nombre)
+                    .FirstOrDefaultAsync();
+
+                if (estudiante == null || materia == null)
+                {
+                    ModelState.AddModelError("", "Datos inválidos seleccionados.");
+                    return View(nota);
+                }
+
+                // Asignar los nombres obtenidos al objeto nota
+                nota.NombreEstudiante = estudiante;
+                nota.NombreAsignatura = materia;
+
+                // Guardar en la base de datos
                 _context.Add(nota);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
 
             // Si no es válida, regresar a la vista con los errores
             // Recargar los datos del ViewBag
             var estudiantes = await _context.Estudiantes
-                .Select(e => e.Nombre)
+                .Select(e => new { e.IdEstudiante, e.Nombre })
                 .ToListAsync();
             var asignaturas = await _context.Materias
-                .Select(m => m.Nombre)
+                .Select(m => new { m.Id, m.Nombre })
                 .ToListAsync();
-            ViewBag.Estudiantes = new SelectList(estudiantes);
-            ViewBag.Asignaturas = new SelectList(asignaturas);
+
+            ViewBag.Estudiantes = new SelectList(estudiantes, "IdEstudiante", "Nombre");
+            ViewBag.Asignaturas = new SelectList(asignaturas, "Id", "Nombre");
 
             return View(nota);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetMateriasPorEstudiante(int estudianteId)
