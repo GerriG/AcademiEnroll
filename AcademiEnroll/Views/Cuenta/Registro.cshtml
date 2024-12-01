@@ -77,14 +77,20 @@
     </section>
 
     <script>
+        function decodeHTMLEntities(text) {
+            var textarea = document.createElement("textarea");
+            textarea.innerHTML = text;
+            return textarea.value;
+        }
+
         @if (TempData["ErrorMessage"] != null)
         {
             <text>
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error',
-                        text: '@TempData["ErrorMessage"]',
-                    });
+                    title: 'Error',
+                    text: decodeHTMLEntities('@Html.Raw(TempData["ErrorMessage"])'),
+                        });
             </text>
         }
         @if (TempData["SuccessMessage"] != null)
@@ -92,17 +98,18 @@
             <text>
                     Swal.fire({
                         icon: 'success',
-                        title: 'Usuario Agregado',
-                        text: '@TempData["SuccessMessage"]',
-                        showConfirmButton: true,
-                        confirmButtonText: 'OK',
-                        // Después de hacer clic en "OK", redirigir a la vista deseada
-                        willClose: () => {
-                            window.location.href = '@Url.Action("Index", "Usuario")';
-                        }
-                    });
+                    title: 'Usuario Agregado',
+                    text: decodeHTMLEntities('@Html.Raw(TempData["SuccessMessage"])'),
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK',
+                            willClose: () => {
+                        window.location.href = '@Url.Action("Index", "Usuario")';
+                            }
+                        });
             </text>
         }
     </script>
+
 </body>
 </html>
+

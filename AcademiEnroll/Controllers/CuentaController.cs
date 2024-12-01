@@ -103,8 +103,15 @@ public class CuentaController : Controller
     [HttpPost]
     public IActionResult Registro(Usuario usuario, string confirmarClave)
     {
-        if (ModelState.IsValid && usuario.Clave == confirmarClave)
+        if (ModelState.IsValid)
         {
+            // Validar que las contraseñas coincidan
+            if (usuario.Clave != confirmarClave)
+            {
+                TempData["ErrorMessage"] = "Las contrase&ntilde;as no coinciden.";
+                return View(usuario); // Regresa a la vista con el mensaje de error
+            }
+
             // Verificar si el correo ya está registrado
             var usuarioExistente = _context.Usuarios.SingleOrDefault(u => u.Correo == usuario.Correo);
             if (usuarioExistente != null)
@@ -117,7 +124,7 @@ public class CuentaController : Controller
             _context.Usuarios.Add(usuario);
             _context.SaveChanges();
 
-            // Aquí puedes agregar otros roles si es necesario
+            // Asignar roles específicos según el tipo de usuario
             if (usuario.Rol == "Estudiante")
             {
                 var estudiante = new Estudiante
@@ -154,14 +161,14 @@ public class CuentaController : Controller
             // Guardar el mensaje de éxito en TempData
             TempData["SuccessMessage"] = "Usuario agregado exitosamente.";
 
-            // No redirigir, simplemente recargar la vista de registro con el mensaje de éxito
+            // Recargar la vista de registro con el mensaje de éxito
             return View();
         }
 
-        // Si no pasa la validación
-        ModelState.AddModelError("", "Error al registrar el usuario.");
-        return View();
+        // Si el modelo no es válido, regresar a la vista con errores de validación
+        return View(usuario);
     }
+
 
     // Creación de la vista de "Olvidé mi contraseña"
     public IActionResult OlvidoContraseña() => View();

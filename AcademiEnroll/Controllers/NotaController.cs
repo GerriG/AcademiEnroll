@@ -120,6 +120,12 @@ namespace AcademiEnroll.Controllers
                 return NotFound();
             }
 
+            // Validar que la calificación esté entre 0 y 10
+            if (nota.Calificacion < 0 || nota.Calificacion > 10)
+            {
+                ModelState.AddModelError("Calificacion", "La calificación debe estar entre 0 y 10.");
+            }
+
             if (ModelState.IsValid)
             {
                 try
@@ -143,8 +149,10 @@ namespace AcademiEnroll.Controllers
                     }
                 }
             }
+
             return View(nota);
         }
+
 
         // GET: NotaController/Create
         public async Task<ActionResult> Create()
