@@ -103,6 +103,18 @@ public class CuentaController : Controller
     [HttpPost]
     public IActionResult Registro(Usuario usuario, string confirmarClave)
     {
+        var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(correoUsuario))
+        {
+            return RedirectToAction("Login", "Cuenta");
+        }
+
+        var userRol = User.FindFirst("Rol")?.Value;
+        if (userRol != "Administrador")
+        {
+            return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+        }
+
         if (ModelState.IsValid)
         {
             // Validar que las contraseñas coincidan
@@ -213,15 +225,77 @@ public class CuentaController : Controller
     }
 
     // Creación de la vista para el Docente
-    public IActionResult VistaDocente() => View("VistaDocente");
+    public IActionResult VistaDocente()
+    {
+        // Obtener el correo del usuario desde los claims
+        var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+
+        // Verificar si el correo es nulo o vacío
+        if (string.IsNullOrEmpty(correoUsuario))
+        {
+            // Redirigir al usuario a la página de login si no está autenticado
+            return RedirectToAction("Login", "Cuenta");
+        }
+
+        // Obtener el rol del usuario desde los claims
+        var userRol = User.FindFirst("Rol")?.Value;
+
+        // Verificar si el rol es "Docente"
+        if (userRol != "Docente")
+        {
+            // Si el rol no es "Docente", devolver un Unauthorized
+            return Unauthorized("Estimado Usuario, usted no es un Docente.");
+        }
+
+        // Si las validaciones pasan, retornar la vista de Docente
+        return View("VistaDocente");
+    }
+
 
     // Creación de la vista para el Estudiante
-    public IActionResult VistaEstudiante() => View("VistaEstudiante");
+    public IActionResult VistaEstudiante()
+    {
+        // Obtener el correo del usuario desde los claims
+        var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+
+        // Verificar si el correo es nulo o vacío
+        if (string.IsNullOrEmpty(correoUsuario))
+        {
+            // Redirigir al usuario a la página de login si no está autenticado
+            return RedirectToAction("Login", "Cuenta");
+        }
+
+        // Obtener el rol del usuario desde los claims
+        var userRol = User.FindFirst("Rol")?.Value;
+
+        // Verificar si el rol es "Estudiante"
+        if (userRol != "Estudiante")
+        {
+            // Si el rol no es "Estudiante", devolver un Unauthorized
+            return Unauthorized("Estimado Usuario, usted no es un Estudiante.");
+        }
+
+        // Si las validaciones pasan, retornar la vista de Estudiante
+        return View("VistaEstudiante");
+    }
+
 
     // Creación de la vista para el Administrador (Dashboard)
     public async Task<IActionResult> VistaAdmin()
     {
         var dashboardData = new DashBoard();
+
+        var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(correoUsuario))
+        {
+            return RedirectToAction("Login");
+        }
+
+        var userRol = User.FindFirst("Rol")?.Value;
+        if (userRol != "Administrador")
+        {
+            return Unauthorized("Estimado Usuario, no tiene acceso al Dahsboard debido a que no es un administrador.");
+        }
 
         using (var connection = (SqlConnection)_context.Database.GetDbConnection())
         {

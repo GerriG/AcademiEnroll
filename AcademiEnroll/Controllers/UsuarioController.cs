@@ -16,7 +16,7 @@ namespace Administrador.Controllers
 
     // GET: UsuarioController
     public async Task<ActionResult> Index()
-        {
+        {  
             var usuarios = await _mantenimientoUsuario.ListarTodos();
             return View(usuarios);
         }

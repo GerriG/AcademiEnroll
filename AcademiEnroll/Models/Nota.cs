@@ -10,11 +10,17 @@ namespace AcademiEnroll.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(50)]
+        public int IdDocente { get; set; }      
+
+        [ForeignKey("IdDocente")]
+        public Docente? Docente { get; set; }
+
+        [Required]
+        [StringLength(100)]
         public string NombreEstudiante { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [StringLength(100)]
         public string NombreAsignatura { get; set; }
 
         [Required]

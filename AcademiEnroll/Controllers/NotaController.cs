@@ -17,52 +17,81 @@ namespace AcademiEnroll.Controllers
             _context = context;
         }
 
-        // GET: NotaController
         public async Task<IActionResult> Index()
         {
-            // Obtener el rol del usuario desde el claim
-            var rol = User.FindFirst("Rol")?.Value;
-            var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value; // Obtener el nombre del usuario (si es necesario)
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
 
-            // Verificar si es Docente
-            if (rol == "Docente")
+            var rol = User.FindFirst("Rol")?.Value;
+            var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value;
+            var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
+
+            if (rol == "Docente" && !string.IsNullOrEmpty(idDocenteClaim) && int.TryParse(idDocenteClaim, out int idDocente))
             {
                 var notasDocente = await _context.Notas
-                    .OrderByDescending(n => n.Id) // Ordenar de más reciente a más antiguo por ID (equivalente a ORDER BY Id DESC)
-                    .Select(n => new Nota
+                    .Where(n => n.IdDocente == idDocente)
+                    .Select(n => new NotaViewModel
                     {
                         Id = n.Id,
                         NombreEstudiante = n.NombreEstudiante,
                         NombreAsignatura = n.NombreAsignatura,
-                        Calificacion = n.Calificacion
+                        Calificacion = n.Calificacion,
+                        NombreDocente = _context.Docentes
+                            .Where(d => d.IdDocente == n.IdDocente)
+                            .Select(d => d.Nombre)
+                            .FirstOrDefault()
                     })
+                    .OrderByDescending(n => n.Id)
                     .ToListAsync();
 
-                ViewBag.EsDocente = true;  // Indicar que es Docente
-                ViewBag.EsAdministrador = false;  // No es Administrador
+                ViewBag.EsDocente = true;
+                ViewBag.EsAdministrador = false;
                 return View(notasDocente);
             }
 
-            // Verificar si es Estudiante
             if (rol == "Estudiante")
             {
                 var notasEstudiante = await _context.Notas
                     .Where(n => n.NombreEstudiante == usuarioNombre)
-                    .OrderByDescending(n => n.Id) // Ordenar de más reciente a más antiguo por ID (equivalente a ORDER BY Id DESC)
+                    .Select(n => new NotaViewModel
+                    {
+                        Id = n.Id,
+                        NombreEstudiante = n.NombreEstudiante,
+                        NombreAsignatura = n.NombreAsignatura,
+                        Calificacion = n.Calificacion,
+                        NombreDocente = _context.Docentes
+                            .Where(d => d.IdDocente == n.IdDocente)
+                            .Select(d => d.Nombre)
+                            .FirstOrDefault()
+                    })
+                    .OrderByDescending(n => n.Id)
                     .ToListAsync();
 
-                ViewBag.EsDocente = false;  // No es Docente
-                ViewBag.EsAdministrador = false;  // No es Administrador
+                ViewBag.EsDocente = false;
+                ViewBag.EsAdministrador = false;
                 return View(notasEstudiante);
             }
 
-            // Si es un Administrador (o cualquier otro rol), devolver todas las notas
             var todasLasNotas = await _context.Notas
-                .OrderBy(n => n.Id) // Ordenar de más reciente a más antiguo por ID (equivalente a ORDER BY Id DESC)
+                .Join(_context.Docentes,
+                      nota => nota.IdDocente,
+                      docente => docente.IdDocente,
+                      (nota, docente) => new NotaViewModel
+                      {
+                          Id = nota.Id,
+                          NombreEstudiante = nota.NombreEstudiante,
+                          NombreAsignatura = nota.NombreAsignatura,
+                          Calificacion = nota.Calificacion,
+                          NombreDocente = docente.Nombre
+                      })
+                .OrderBy(n => n.Id)
                 .ToListAsync();
 
-            ViewBag.EsDocente = false;  // No es Docente
-            ViewBag.EsAdministrador = true;  // Es Administrador
+            ViewBag.EsDocente = false;
+            ViewBag.EsAdministrador = true;
             return View(todasLasNotas);
         }
 
@@ -71,6 +100,12 @@ namespace AcademiEnroll.Controllers
         // GET: NotaController/Details/5
         public async Task<ActionResult> Details(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }            
+
             // Buscar la nota por su id
             var nota = await _context.Notas.FindAsync(id);
 
@@ -91,6 +126,18 @@ namespace AcademiEnroll.Controllers
         // GET: NotaController/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             // Verificar el rol del usuario en el controlador
             var rol = User.FindFirst("Rol")?.Value;
 
@@ -157,11 +204,16 @@ namespace AcademiEnroll.Controllers
         // GET: NotaController/Create
         public async Task<ActionResult> Create()
         {
-            var rol = User.FindFirst("Rol")?.Value;
-
-            if (rol != "Docente")
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
             {
-                return Unauthorized();
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Docente")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Docente.");
             }
 
             var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
@@ -182,43 +234,27 @@ namespace AcademiEnroll.Controllers
             return View();
         }
 
-
         // POST: NotaController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create([Bind("NombreEstudiante,NombreAsignatura,Calificacion")] Nota nota)
         {
+            var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
+            if (string.IsNullOrEmpty(idDocenteClaim) || !int.TryParse(idDocenteClaim, out var idDocente))
+            {
+                return Unauthorized("No se encontró el Id del docente.");
+            }
+
+            nota.IdDocente = idDocente; // Asignar el IdDocente del usuario actual
+
             // Validación de la calificación
             if (nota.Calificacion < 0 || nota.Calificacion > 10)
             {
-                // Agregar mensaje de error al ModelState
                 ModelState.AddModelError("Calificacion", "Nota inválida! Ingrese una nota de 0 a 10.");
             }
 
             if (ModelState.IsValid)
             {
-                // Obtener el nombre del estudiante usando su ID
-                var estudiante = await _context.Estudiantes
-                    .Where(e => e.IdEstudiante == int.Parse(nota.NombreEstudiante)) // NombreEstudiante contiene el ID
-                    .Select(e => e.Nombre)
-                    .FirstOrDefaultAsync();
-
-                // Obtener el nombre de la asignatura usando su ID
-                var materia = await _context.Materias
-                    .Where(m => m.Id == int.Parse(nota.NombreAsignatura)) // NombreAsignatura contiene el ID
-                    .Select(m => m.Nombre)
-                    .FirstOrDefaultAsync();
-
-                if (estudiante == null || materia == null)
-                {
-                    ModelState.AddModelError("", "Datos inválidos seleccionados.");
-                    return View(nota);
-                }
-
-                // Asignar los nombres obtenidos al objeto nota
-                nota.NombreEstudiante = estudiante;
-                nota.NombreAsignatura = materia;
-
                 // Guardar en la base de datos
                 _context.Add(nota);
                 await _context.SaveChangesAsync();
@@ -226,25 +262,33 @@ namespace AcademiEnroll.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Si no es válida, regresar a la vista con los errores
-            // Recargar los datos del ViewBag
-            var estudiantes = await _context.Estudiantes
-                .Select(e => new { e.IdEstudiante, e.Nombre })
-                .ToListAsync();
-            var asignaturas = await _context.Materias
-                .Select(m => new { m.Id, m.Nombre })
+            // Si hay errores, recargar estudiantes
+            var estudiantes = await _context.Inscripciones
+                .Where(i => i.Materia.IdDocente == idDocente)
+                .Select(i => i.Estudiante)
+                .Distinct()
                 .ToListAsync();
 
             ViewBag.Estudiantes = new SelectList(estudiantes, "IdEstudiante", "Nombre");
-            ViewBag.Asignaturas = new SelectList(asignaturas, "Id", "Nombre");
 
             return View(nota);
-        }
-
+        }       
 
         [HttpGet]
         public async Task<IActionResult> GetMateriasPorEstudiante(int estudianteId)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Docente")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Docente.");
+            }
+
             var rol = User.FindFirst("Rol")?.Value;
 
             if (rol != "Docente")
@@ -271,6 +315,18 @@ namespace AcademiEnroll.Controllers
         // GET: Nota/Delete/
         public async Task<IActionResult> Delete(int id)
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var userRol = User.FindFirst("Rol")?.Value;
+            if (userRol != "Administrador")
+            {
+                return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+            }
+
             // Aquí se asegura que el usuario tiene el rol adecuado
             var rol = User.FindFirst("Rol")?.Value;
             if (rol != "Administrador")
