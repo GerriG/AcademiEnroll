@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AcademiEnroll.Controllers
@@ -20,8 +21,20 @@ namespace AcademiEnroll.Controllers
         // GET: PeriodoGlobal/Edit
         public async Task<IActionResult> Edit()
         {
-            // Intentar obtener el primer periodo de la base de datos con Id = 1
-            var periodo = await _context.PeriodoGlobal.FindAsync(1);
+			var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+			if (string.IsNullOrEmpty(correoUsuario))
+			{
+				return RedirectToAction("Login", "Cuenta");
+			}
+
+			var userRol = User.FindFirst("Rol")?.Value;
+			if (userRol != "Administrador")
+			{
+				return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+			}
+
+			// Intentar obtener el primer periodo de la base de datos con Id = 1
+			var periodo = await _context.PeriodoGlobal.FindAsync(1);
 
             // Si no existe un periodo con Id = 1, crear uno nuevo con valor predeterminado
             if (periodo == null)
@@ -84,7 +97,19 @@ namespace AcademiEnroll.Controllers
         // GET: PeriodoGlobal/Index
         public async Task<IActionResult> Index()
         {
-            var periodoGlobal = await _context.PeriodoGlobal.FindAsync(1);
+			var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+			if (string.IsNullOrEmpty(correoUsuario))
+			{
+				return RedirectToAction("Login", "Cuenta");
+			}
+
+			var userRol = User.FindFirst("Rol")?.Value;
+			if (userRol != "Administrador")
+			{
+				return Unauthorized("Estimado Usuario, usted no es un Administrador.");
+			}
+
+			var periodoGlobal = await _context.PeriodoGlobal.FindAsync(1);
             return View(periodoGlobal);
         }
 

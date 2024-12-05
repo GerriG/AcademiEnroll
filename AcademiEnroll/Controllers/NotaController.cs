@@ -106,10 +106,23 @@ namespace AcademiEnroll.Controllers
             if (string.IsNullOrEmpty(correoUsuario))
             {
                 return RedirectToAction("Login", "Cuenta");
-            }            
+            }
 
-            // Buscar la nota por su id
-            var nota = await _context.Notas.FindAsync(id);
+            // Buscar la nota por su id e incluir los datos relacionados
+            var nota = await (from n in _context.Notas
+                              join d in _context.Docentes on n.IdDocente equals d.IdDocente
+                              join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+                              join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+                              where n.Id == id
+                              select new NotaViewModel
+                              {
+                                  Id = n.Id,
+                                  NombreEstudiante = e.Nombre, // Nombre del estudiante
+                                  Nombre = m.Nombre, // Nombre de la materia
+                                  Calificacion = n.Calificacion,
+                                  NombreDocente = d.Nombre,
+                                  Periodo = n.Periodo
+                              }).FirstOrDefaultAsync(); // Obtiene solo la primera coincidencia
 
             if (nota == null)
             {
@@ -122,8 +135,9 @@ namespace AcademiEnroll.Controllers
             // Asignar a ViewBag.EsDocente si el rol es Docente
             ViewBag.EsDocente = rol == "Docente";
 
-            return View(nota); // Retorna la nota a la vista
+            return View(nota); // Retorna la nota a la vista con la información relacionada
         }
+
 
         // GET: NotaController/Edit/5
         public async Task<IActionResult> Edit(int id)
@@ -323,7 +337,6 @@ namespace AcademiEnroll.Controllers
         }
 
 
-        // GET: Nota/Delete/
         public async Task<IActionResult> Delete(int id)
         {
             var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -345,9 +358,21 @@ namespace AcademiEnroll.Controllers
                 return Unauthorized(); // Si el rol no es "Administrador", se deniega el acceso
             }
 
-            // Buscar la nota por ID
-            var nota = await _context.Notas
-                .FirstOrDefaultAsync(m => m.Id == id);
+            // Buscar la nota por ID e incluir los datos relacionados de Estudiantes, Docentes y Materias
+            var nota = await (from n in _context.Notas
+                              join d in _context.Docentes on n.IdDocente equals d.IdDocente
+                              join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+                              join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+                              where n.Id == id
+                              select new NotaViewModel
+                              {
+                                  Id = n.Id,
+                                  NombreEstudiante = e.Nombre, // Nombre del estudiante
+                                  Nombre = m.Nombre, // Nombre de la materia
+                                  Calificacion = n.Calificacion,
+                                  NombreDocente = d.Nombre,
+                                  Periodo = n.Periodo
+                              }).FirstOrDefaultAsync(); // Obtiene solo la primera coincidencia
 
             if (nota == null)
             {
@@ -356,6 +381,7 @@ namespace AcademiEnroll.Controllers
 
             return View(nota); // Mostrar la vista de confirmación con los detalles de la nota
         }
+
 
         // POST: Nota/Delete/5
         [HttpPost, ActionName("Delete")]

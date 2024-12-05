@@ -5,7 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
+<h1>Editar</h1>
 
 <h4>PeriodoGlobal</h4>
 <hr />
@@ -22,18 +22,14 @@
                          new { @class = "form-control", id = "Periodo" }
                          )
             </div>
-
+            <br />
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Actualizar" class="btn btn-primary" />
+                <a asp-controller="Nota" asp-action="Index" class="btn btn-warning">Volver a Notas</a>
             </div>
         </form>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

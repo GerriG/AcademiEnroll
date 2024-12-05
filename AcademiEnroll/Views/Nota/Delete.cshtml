@@ -1,4 +1,4 @@
-﻿@model AcademiEnroll.Models.Nota
+﻿@model NotaViewModel
 
 @{
     ViewData["Title"] = "Eliminar Nota";
@@ -16,19 +16,29 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.NombreEstudiante)
         </dd>
-
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.NombreAsignatura)
+            @Html.DisplayNameFor(model => model.Nombre)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.NombreAsignatura)
+            @Html.DisplayFor(model => model.Nombre)
         </dd>
-
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Calificacion)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Calificacion)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.NombreDocente)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.NombreDocente)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Periodo)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Periodo)
         </dd>
     </dl>
 
