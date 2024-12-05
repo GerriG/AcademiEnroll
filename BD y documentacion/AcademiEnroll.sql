@@ -45,7 +45,7 @@ BEGIN
 	);
 END;
 GO
-
+select * from materias
 -- Crear la tabla Docentes si no existe
 IF NOT EXISTS (
 	SELECT 1 
@@ -129,23 +129,8 @@ BEGIN
 );
 
 END;
-GO
 
--- Crear la tabla Asignaturas si no existe
-IF NOT EXISTS (
-	SELECT 1 
-	FROM sys.tables 
-	WHERE name = 'Asignaturas' AND type = 'U'
-)
-BEGIN
-	CREATE TABLE Asignaturas (
-		IdAsignatura INT IDENTITY(1,1) PRIMARY KEY,
-		Asignatura NVARCHAR(100) NOT NULL,
-		Descripcion NVARCHAR(255) NOT NULL
-	);
-END;
 GO
-
 -- Crear la tabla Notas si no existe
 IF NOT EXISTS (
 	SELECT 1 
@@ -154,16 +139,32 @@ IF NOT EXISTS (
 )
 BEGIN
 	CREATE TABLE Notas (
-		Id INT IDENTITY(1,1) PRIMARY KEY,
-		NombreEstudiante NVARCHAR(100) NOT NULL,
-		NombreAsignatura NVARCHAR(100) NOT NULL,
-		Calificacion DECIMAL(5,2) NOT NULL
-	);
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    IdDocente INT NOT NULL,
+    NombreEstudiante NVARCHAR(100) NOT NULL,
+    NombreAsignatura NVARCHAR(100) NOT NULL,
+    Calificacion DECIMAL(5,2) NOT NULL,
+    Periodo INT NOT NULL,  -- Columna para almacenar el periodo
+    CONSTRAINT FK_Notas_Docentes FOREIGN KEY (IdDocente) REFERENCES Docentes(IdDocente)
+);
 END;
 GO
-select * from Usuarios
-Delete from Usuarios where IdUsuario = 20
-select * from Docentes
+select * from Materias
+-- Crear la tabla PeriodoGlobal si no existe
+IF NOT EXISTS (
+	SELECT 1 
+	FROM sys.tables 
+	WHERE name = 'PeriodoGlobal' AND type = 'U'
+)
+BEGIN
+	CREATE TABLE PeriodoGlobal (
+		Id INT IDENTITY(1,1) PRIMARY KEY,  -- Un identificador único
+		Periodo INT NOT NULL CHECK (Periodo BETWEEN 1 AND 5)  -- El periodo debe estar entre 1 y 5
+	);
+END;
+update PeriodoGlobal set Periodo = 2 WHERE Id = 1
+GO
+
 -- Crear o actualizar el procedimiento almacenado sp_AgregarNota
 CREATE OR ALTER PROCEDURE sp_AgregarNota
 	@NombreEstudiante NVARCHAR(100),
