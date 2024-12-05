@@ -18,82 +18,84 @@ namespace AcademiEnroll.Controllers
         }
 
         public async Task<IActionResult> Index()
-        {
-            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
-            if (string.IsNullOrEmpty(correoUsuario))
-            {
-                return RedirectToAction("Login", "Cuenta");
-            }
+{
+    var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+    if (string.IsNullOrEmpty(correoUsuario))
+    {
+        return RedirectToAction("Login", "Cuenta");
+    }
 
-            var rol = User.FindFirst("Rol")?.Value;
-            var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value;
-            var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
+    var rol = User.FindFirst("Rol")?.Value;
+    var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value;
+    var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
 
-            if (rol == "Docente" && !string.IsNullOrEmpty(idDocenteClaim) && int.TryParse(idDocenteClaim, out int idDocente))
-            {
-                var notasDocente = await _context.Notas
-                    .Where(n => n.IdDocente == idDocente)
-                    .Select(n => new NotaViewModel
-                    {
-                        Id = n.Id,
-                        NombreEstudiante = n.NombreEstudiante,
-                        NombreAsignatura = n.NombreAsignatura,
-                        Calificacion = n.Calificacion,
-                        NombreDocente = _context.Docentes
-                            .Where(d => d.IdDocente == n.IdDocente)
-                            .Select(d => d.Nombre)
-                            .FirstOrDefault()
-                    })
-                    .OrderByDescending(n => n.Id)
-                    .ToListAsync();
+    if (rol == "Docente" && !string.IsNullOrEmpty(idDocenteClaim) && int.TryParse(idDocenteClaim, out int idDocente))
+    {
+				var notasDocente = await (from n in _context.Notas
+											 join d in _context.Docentes on n.IdDocente equals d.IdDocente
+											 join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+											 join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+											 select new NotaViewModel
+											 {
+												 Id = n.Id,
+												 NombreEstudiante = e.Nombre,
+												 Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
+												 Calificacion = n.Calificacion,
+												 NombreDocente = d.Nombre,
+												 Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
+											 })
+					.OrderBy(n => n.Id)
+					.ToListAsync();
 
-                ViewBag.EsDocente = true;
-                ViewBag.EsAdministrador = false;
-                return View(notasDocente);
-            }
+				ViewBag.EsDocente = true;
+        ViewBag.EsAdministrador = false;
+        return View(notasDocente);
+    }
 
-            if (rol == "Estudiante")
-            {
-                var notasEstudiante = await _context.Notas
-                    .Where(n => n.NombreEstudiante == usuarioNombre)
-                    .Select(n => new NotaViewModel
-                    {
-                        Id = n.Id,
-                        NombreEstudiante = n.NombreEstudiante,
-                        NombreAsignatura = n.NombreAsignatura,
-                        Calificacion = n.Calificacion,
-                        NombreDocente = _context.Docentes
-                            .Where(d => d.IdDocente == n.IdDocente)
-                            .Select(d => d.Nombre)
-                            .FirstOrDefault()
-                    })
-                    .OrderByDescending(n => n.Id)
-                    .ToListAsync();
+    if (rol == "Estudiante")
+    {
+				var notasEstudiante = await (from n in _context.Notas
+										   join d in _context.Docentes on n.IdDocente equals d.IdDocente
+										   join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+										   join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+										   select new NotaViewModel
+										   {
+											   Id = n.Id,
+											   NombreEstudiante = e.Nombre,
+											   Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
+											   Calificacion = n.Calificacion,
+											   NombreDocente = d.Nombre,
+											   Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
+										   })
+			.OrderBy(n => n.Id)
+			.ToListAsync();
 
-                ViewBag.EsDocente = false;
-                ViewBag.EsAdministrador = false;
-                return View(notasEstudiante);
-            }
+				ViewBag.EsDocente = false;
+        ViewBag.EsAdministrador = false;
+        return View(notasEstudiante);
+    }
 
-            var todasLasNotas = await _context.Notas
-                .Join(_context.Docentes,
-                      nota => nota.IdDocente,
-                      docente => docente.IdDocente,
-                      (nota, docente) => new NotaViewModel
-                      {
-                          Id = nota.Id,
-                          NombreEstudiante = nota.NombreEstudiante,
-                          NombreAsignatura = nota.NombreAsignatura,
-                          Calificacion = nota.Calificacion,
-                          NombreDocente = docente.Nombre
-                      })
-                .OrderBy(n => n.Id)
-                .ToListAsync();
+			var todasLasNotas = await (from n in _context.Notas
+									   join d in _context.Docentes on n.IdDocente equals d.IdDocente
+									   join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+									   join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+									   select new NotaViewModel
+								   {
+									   Id = n.Id,
+									   NombreEstudiante = e.Nombre,
+									   Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
+									   Calificacion = n.Calificacion,
+									   NombreDocente = d.Nombre,
+									   Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
+								   })
+	.OrderBy(n => n.Id)
+	.ToListAsync();
 
-            ViewBag.EsDocente = false;
-            ViewBag.EsAdministrador = true;
-            return View(todasLasNotas);
-        }
+			ViewBag.EsDocente = false;
+    ViewBag.EsAdministrador = true;
+    return View(todasLasNotas);
+}
+
 
 
 
@@ -255,6 +257,14 @@ namespace AcademiEnroll.Controllers
 
             if (ModelState.IsValid)
             {
+                // Obtener el periodo global actual
+                var periodoGlobal = await _context.PeriodoGlobal.FirstOrDefaultAsync();
+                if (periodoGlobal != null)
+                {
+                    // Asignar el periodo del global al objeto Nota
+                    nota.Periodo = periodoGlobal.Periodo;
+                }
+
                 // Guardar en la base de datos
                 _context.Add(nota);
                 await _context.SaveChangesAsync();
@@ -272,7 +282,8 @@ namespace AcademiEnroll.Controllers
             ViewBag.Estudiantes = new SelectList(estudiantes, "IdEstudiante", "Nombre");
 
             return View(nota);
-        }       
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> GetMateriasPorEstudiante(int estudianteId)

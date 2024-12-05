@@ -1,0 +1,29 @@
+﻿@model AcademiEnroll.Models.PeriodoGlobal
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Periodo Asignado</h1>
+<hr />
+@if (TempData["Message"] != null)
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+        Swal.fire({
+            title: 'Información',
+            text: '@TempData["Message"]',
+            icon: '@TempData["MessageType"]', // Distinción entre éxito y error
+            confirmButtonText: 'Ok'
+        });
+    </script>
+}
+
+<div>
+    <h4>Periodo: @Model.Periodo</h4>
+</div>
+
+<div>
+    <a asp-action="Edit" class="btn btn-primary">Editar Periodo</a>
+</div>

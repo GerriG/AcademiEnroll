@@ -17,6 +17,7 @@ namespace AcademiEnroll.Data
         public DbSet<Materia> Materias { get; set; }
         public DbSet<Nota> Notas { get; set; }
         public DbSet<Inscripciones> Inscripciones { get; set; }
+        public DbSet<PeriodoGlobal> PeriodoGlobal { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -95,7 +96,14 @@ namespace AcademiEnroll.Data
                 .WithMany()  // Relación de uno a muchos, una materia puede tener muchas inscripciones
                 .HasForeignKey(i => i.IdMateria)
                 .OnDelete(DeleteBehavior.Cascade);  // Eliminación en cascada cuando se elimina una materia
-        }
+			
+
+			// Relación Materia -> Docente (opcional si es relevante para otras consultas)
+			modelBuilder.Entity<Materia>()
+				.HasOne(m => m.Docente)
+				.WithMany()
+				.HasForeignKey(m => m.IdDocente);
+		}
 
         // Método para ejecutar un procedimiento almacenado para el Dashboard usando EF Core
         public async Task<DashBoard> ObtenerDashboardDataAsync()

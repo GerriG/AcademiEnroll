@@ -4,24 +4,13 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 @section Estilos {
     <link href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.css" rel="stylesheet" />
-
     <style>
-        .btn-exportar-excel {
-            background-color: #198754 !important;
-            color: white !important;
-        }
-
-        .btn-exportar-pdf {
-            background-color: #dc3545 !important;
-            color: white !important;
-        }
-
-        .btn-exportar-print {
-            background-color: #0d6efd !important;
-            color: white !important;
-        }
+        .btn-exportar-excel { background-color: #198754 !important; color: white !important; }
+        .btn-exportar-pdf { background-color: #dc3545 !important; color: white !important; }
+        .btn-exportar-print { background-color: #0d6efd !important; color: white !important; }
     </style>
 }
 
@@ -32,57 +21,77 @@
             <i class="fa-solid fa-notes-medical"></i> Cargar Nota
         </a>
     }
+    @if ((bool)ViewBag.EsAdministrador)
+    {
+        <a asp-controller="PeriodoGlobal" asp-action="Edit" class="btn btn-info">
+            <i class="fas fa-calendar"></i> Establecer Periodo
+        </a>
+    }
 </p>
 
 <h1>Listado de notas</h1>
 
+@if (TempData["Message"] != null)
+{
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+        Swal.fire({
+            title: 'Información',
+            text: '@TempData["Message"]',
+            icon: '@TempData["MessageType"]',
+            confirmButtonText: 'Ok'
+        });
+    </script>
+}
+
 <table id="Nota" class="table table-striped">
     <thead>
-    <tr>
-        <th>@Html.DisplayNameFor(model => model.Id)</th>
-        <th>@Html.DisplayNameFor(model => model.NombreEstudiante)</th>
-        <th>@Html.DisplayNameFor(model => model.NombreAsignatura)</th>
-        <th>@Html.DisplayNameFor(model => model.Calificacion)</th>
-        @if ((bool)ViewBag.EsAdministrador)
-        {
-            <th>Docente</th>
-        }
-        <th>Acciones</th>
-    </tr>
-</thead>
-<tbody>
-    @foreach (var item in Model)
-    {
         <tr>
-            <td>@Html.DisplayFor(modelItem => item.Id)</td>
-            <td>@Html.DisplayFor(modelItem => item.NombreEstudiante)</td>
-            <td>@Html.DisplayFor(modelItem => item.NombreAsignatura)</td>
-            <td>@Html.DisplayFor(modelItem => item.Calificacion)</td>
+            <th>@Html.DisplayNameFor(model => model.Id)</th>
+            <th>@Html.DisplayNameFor(model => model.NombreEstudiante)</th>
+            <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+            <th>@Html.DisplayNameFor(model => model.Calificacion)</th>
+            <th>@Html.DisplayNameFor(model => model.Periodo)</th>
             @if ((bool)ViewBag.EsAdministrador)
             {
-                    <td>@item.NombreDocente</td>
+                <th>Docente</th>
             }
-            <td>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                <td>@Html.DisplayFor(modelItem => item.NombreEstudiante)</td>
+                <td>@Html.DisplayFor(modelItem => item.Nombre)</td>
+                <td>@Html.DisplayFor(modelItem => item.Calificacion)</td>
+                <td>@item.Periodo</td>
                 @if ((bool)ViewBag.EsAdministrador)
                 {
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm text-white" title="Editar">
-                        <i class="fas fa-edit"></i> Editar
-                    </a>
+                    <td>@item.NombreDocente</td>
                 }
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Detalles">
-                    <i class="fas fa-info-circle"></i> Detalles
-                </a>
-                @if ((bool)ViewBag.EsAdministrador)
-                {
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm text-white" title="Eliminar">
-                        <i class="fas fa-trash"></i> Eliminar
+                <td>
+                    @if ((bool)ViewBag.EsAdministrador)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm text-white" title="Editar">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    }
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Detalles">
+                        <i class="fas fa-info-circle"></i> Detalles
                     </a>
-                }
-            </td>
-        </tr>    
-}
-</tbody>
-
+                    @if ((bool)ViewBag.EsAdministrador)
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm text-white" title="Eliminar">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
 
 @section Scripts {
@@ -125,9 +134,9 @@
                     },
                     "pageLength"
                 ],
-                "order": [[0, 'asc']] // Aquí se especifica que la columna 0 (Id) se ordene de forma descendente
+                "order": [[0, 'asc']] // Ordenar por la primera columna (Id) de forma ascendente
             });
         });
     </script>
-
 }
+
