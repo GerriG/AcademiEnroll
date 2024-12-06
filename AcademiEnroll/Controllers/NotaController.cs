@@ -19,61 +19,61 @@ namespace AcademiEnroll.Controllers
 
         public async Task<IActionResult> Index()
 {
-    var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
-    if (string.IsNullOrEmpty(correoUsuario))
-    {
-        return RedirectToAction("Login", "Cuenta");
-    }
+        var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+        if (string.IsNullOrEmpty(correoUsuario))
+        {
+            return RedirectToAction("Login", "Cuenta");
+        }
 
-    var rol = User.FindFirst("Rol")?.Value;
-    var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value;
-    var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
+        var rol = User.FindFirst("Rol")?.Value;
+        var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value;
+        var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
 
-    if (rol == "Docente" && !string.IsNullOrEmpty(idDocenteClaim) && int.TryParse(idDocenteClaim, out int idDocente))
-    {
-				var notasDocente = await (from n in _context.Notas
-											 join d in _context.Docentes on n.IdDocente equals d.IdDocente
-											 join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
-											 join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
-											 select new NotaViewModel
-											 {
-												 Id = n.Id,
-												 NombreEstudiante = e.Nombre,
-												 Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
-												 Calificacion = n.Calificacion,
-												 NombreDocente = d.Nombre,
-												 Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
-											 })
-					.OrderBy(n => n.Id)
-					.ToListAsync();
+        if (rol == "Docente" && !string.IsNullOrEmpty(idDocenteClaim) && int.TryParse(idDocenteClaim, out int idDocente))
+        {
+				    var notasDocente = await (from n in _context.Notas
+											     join d in _context.Docentes on n.IdDocente equals d.IdDocente
+											     join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+											     join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+											     select new NotaViewModel
+											     {
+												     Id = n.Id,
+												     NombreEstudiante = e.Nombre,
+												     Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
+												     Calificacion = n.Calificacion,
+												     NombreDocente = d.Nombre,
+												     Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
+											     })
+					    .OrderBy(n => n.Id)
+					    .ToListAsync();
 
-				ViewBag.EsDocente = true;
-        ViewBag.EsAdministrador = false;
-        return View(notasDocente);
-    }
+				    ViewBag.EsDocente = true;
+            ViewBag.EsAdministrador = false;
+            return View(notasDocente);
+        }
 
-    if (rol == "Estudiante")
-    {
-				var notasEstudiante = await (from n in _context.Notas
-										   join d in _context.Docentes on n.IdDocente equals d.IdDocente
-										   join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
-										   join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
-										   select new NotaViewModel
-										   {
-											   Id = n.Id,
-											   NombreEstudiante = e.Nombre,
-											   Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
-											   Calificacion = n.Calificacion,
-											   NombreDocente = d.Nombre,
-											   Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
-										   })
-			.OrderBy(n => n.Id)
-			.ToListAsync();
+        if (rol == "Estudiante")
+        {
+				    var notasEstudiante = await (from n in _context.Notas
+										       join d in _context.Docentes on n.IdDocente equals d.IdDocente
+										       join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+										       join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+										       select new NotaViewModel
+										       {
+											       Id = n.Id,
+											       NombreEstudiante = e.Nombre,
+											       Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
+											       Calificacion = n.Calificacion,
+											       NombreDocente = d.Nombre,
+											       Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
+										       })
+			    .OrderBy(n => n.Id)
+			    .ToListAsync();
 
-				ViewBag.EsDocente = false;
-        ViewBag.EsAdministrador = false;
-        return View(notasEstudiante);
-    }
+				    ViewBag.EsDocente = false;
+            ViewBag.EsAdministrador = false;
+            return View(notasEstudiante);
+        }
 
 			var todasLasNotas = await (from n in _context.Notas
 									   join d in _context.Docentes on n.IdDocente equals d.IdDocente
@@ -88,13 +88,13 @@ namespace AcademiEnroll.Controllers
 									   NombreDocente = d.Nombre,
 									   Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
 								   })
-	.OrderBy(n => n.Id)
-	.ToListAsync();
+	    .OrderBy(n => n.Id)
+	    .ToListAsync();
 
 			ViewBag.EsDocente = false;
-    ViewBag.EsAdministrador = true;
-    return View(todasLasNotas);
-}
+            ViewBag.EsAdministrador = true;
+            return View(todasLasNotas);
+        }
 
 
 
@@ -266,36 +266,43 @@ namespace AcademiEnroll.Controllers
             // Validación de la calificación
             if (nota.Calificacion < 0 || nota.Calificacion > 10)
             {
-                ModelState.AddModelError("Calificacion", "Nota inválida! Ingrese una nota de 0 a 10.");
-            }
-
-            if (ModelState.IsValid)
-            {
-                // Obtener el periodo global actual
-                var periodoGlobal = await _context.PeriodoGlobal.FirstOrDefaultAsync();
-                if (periodoGlobal != null)
-                {
-                    // Asignar el periodo del global al objeto Nota
-                    nota.Periodo = periodoGlobal.Periodo;
-                }
-
-                // Guardar en la base de datos
-                _context.Add(nota);
-                await _context.SaveChangesAsync();
-
+                TempData["ErrorMessage"] = "Nota inválida. Ingrese una calificación entre 0 y 10.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Si hay errores, recargar estudiantes
-            var estudiantes = await _context.Inscripciones
-                .Where(i => i.Materia.IdDocente == idDocente)
-                .Select(i => i.Estudiante)
-                .Distinct()
-                .ToListAsync();
+            // Obtener el periodo global actual
+            var periodoGlobal = await _context.PeriodoGlobal.FirstOrDefaultAsync();
+            if (periodoGlobal == null)
+            {
+                TempData["ErrorMessage"] = "No se encontró un periodo activo. Contacte al administrador.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            ViewBag.Estudiantes = new SelectList(estudiantes, "IdEstudiante", "Nombre");
+            // Asignar el periodo al objeto Nota
+            nota.Periodo = periodoGlobal.Periodo;
 
-            return View(nota);
+            // Verificar si ya existe una nota para este estudiante, materia y periodo
+            var notaExistente = await (from n in _context.Notas
+                                       join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+                                       where n.Periodo == nota.Periodo && n.NombreEstudiante == nota.NombreEstudiante
+                                       select new
+                                       {
+                                           n.Id,
+                                           NombreEstudiante = e.Nombre // Obtenemos el nombre del estudiante
+                                       }).FirstOrDefaultAsync();
+
+            if (notaExistente != null)
+            {
+                TempData["ErrorMessage"] = $"El estudiante {notaExistente.NombreEstudiante} ya tiene una nota registrada para el periodo {nota.Periodo}.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Guardar la nota si no existe conflicto
+            _context.Add(nota);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Nota creada exitosamente.";
+            return RedirectToAction(nameof(Index));
         }
 
 

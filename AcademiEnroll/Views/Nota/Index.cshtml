@@ -137,6 +137,26 @@
                 "order": [[0, 'asc']] // Ordenar por la primera columna (Id) de forma ascendente
             });
         });
+
+        // Mostrar mensaje de error
+        const errorMessage = '@TempData["ErrorMessage"]';
+        if (errorMessage) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+            });
+        }
+
+        // Mostrar mensaje de éxito
+        const successMessage = '@TempData["SuccessMessage"]';
+        if (successMessage) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: successMessage,
+            });
+        }
     </script>
 }
 
