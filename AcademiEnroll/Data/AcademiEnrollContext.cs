@@ -18,6 +18,7 @@ namespace AcademiEnroll.Data
         public DbSet<Nota> Notas { get; set; }
         public DbSet<Inscripciones> Inscripciones { get; set; }
         public DbSet<PeriodoGlobal> PeriodoGlobal { get; set; }
+        public DbSet<MateriasAprobadas> MateriasAprobadas { get; set; } // Agregado
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -103,7 +104,24 @@ namespace AcademiEnroll.Data
 				.HasOne(m => m.Docente)
 				.WithMany()
 				.HasForeignKey(m => m.IdDocente);
-		}
+
+            // Configuración para MateriasAprobadas
+            modelBuilder.Entity<MateriasAprobadas>().HasKey(ma => ma.Id);
+
+            // Relación MateriasAprobadas -> Estudiante
+            modelBuilder.Entity<MateriasAprobadas>()
+                .HasOne<Estudiante>() // Sin propiedad de navegación explícita
+                .WithMany()
+                .HasForeignKey(ma => ma.IdEstudiante)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación MateriasAprobadas -> Materia
+            modelBuilder.Entity<MateriasAprobadas>()
+                .HasOne<Materia>() // Sin propiedad de navegación explícita
+                .WithMany()
+                .HasForeignKey(ma => ma.IdMateria)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
 
         // Método para ejecutar un procedimiento almacenado para el Dashboard usando EF Core
         public async Task<DashBoard> ObtenerDashboardDataAsync()

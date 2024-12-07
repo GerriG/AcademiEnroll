@@ -297,13 +297,17 @@ namespace AcademiEnroll.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Guardar la nota si no existe conflicto
-            _context.Add(nota);
+            // Guardar la nota
+            _context.Notas.Add(nota);
             await _context.SaveChangesAsync();
+
+            // Verificar promedio después de guardar la nota
+            await VerificarPromedio(int.Parse(nota.NombreAsignatura), int.Parse(nota.NombreEstudiante));
 
             TempData["SuccessMessage"] = "Nota creada exitosamente.";
             return RedirectToAction(nameof(Index));
         }
+
 
 
         [HttpGet]
@@ -413,5 +417,51 @@ namespace AcademiEnroll.Controllers
         {
             return _context.Notas.Any(e => e.Id == id);
         }
+
+        //Verificar Promedio
+        public async Task<IActionResult> VerificarPromedio(int idMateria, int idEstudiante)
+        {
+            // Obtener las notas de la materia en los 5 periodos
+            var notas = await _context.Notas
+                .Where(n => n.NombreAsignatura == idMateria.ToString() && n.NombreEstudiante == idEstudiante.ToString())
+                .ToListAsync();
+
+            if (notas.Count == 5)
+            {
+                // Calcular el promedio con una sola decimal
+                var promedio = Math.Round(notas.Average(n => n.Calificacion), 1);
+
+                if (promedio >= 6.0m)
+                {
+                    // Revisar si ya existe en MateriasAprobadas
+                    var aprobadaExistente = await _context.MateriasAprobadas
+                        .FirstOrDefaultAsync(ma => ma.IdMateria == idMateria && ma.IdEstudiante == idEstudiante);
+
+                    if (aprobadaExistente == null)
+                    {
+                        // Mover a MateriasAprobadas
+                        var materiaAprobada = new MateriasAprobadas
+                        {
+                            IdMateria = idMateria,
+                            IdEstudiante = idEstudiante,
+                            Promedio = promedio,
+                            FechaAprobacion = DateTime.Now
+                        };
+
+                        _context.MateriasAprobadas.Add(materiaAprobada);
+                        await _context.SaveChangesAsync();
+
+                        TempData["Success"] = "Materia aprobada y movida exitosamente.";
+                    }
+                }
+                else
+                {
+                    TempData["Error"] = "El promedio no alcanzó el mínimo para aprobar. Debes repetir la materia.";
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

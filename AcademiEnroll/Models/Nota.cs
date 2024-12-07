@@ -25,16 +25,7 @@ namespace AcademiEnroll.Models
 		public decimal Calificacion { get; set; }
 
 		public int Periodo { get; set; } // Columna Periodo
-
-		// Las siguientes relaciones son opcionales si no las necesitas para otras operaciones
-		// [ForeignKey("IdDocente")]
-		// public Docente Docente { get; set; }
-
-		// [ForeignKey("Id")]
-		// public Estudiante Estudiante { get; set; }
-
-		// [ForeignKey("Id")]
-		// public Materia Materia { get; set; }
+		
 	}
 }
 
