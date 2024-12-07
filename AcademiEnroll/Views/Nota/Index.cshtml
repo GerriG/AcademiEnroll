@@ -138,25 +138,39 @@
             });
         });
 
+        function decodeHtml(html) {
+            var txt = document.createElement('textarea');
+            txt.innerHTML = html;
+            return txt.value;
+        }
+
         // Mostrar mensaje de error
         const errorMessage = '@TempData["ErrorMessage"]';
         if (errorMessage) {
+            // Decodifica las entidades HTML
+            const decodedErrorMessage = decodeHtml(errorMessage);
+
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: errorMessage,
+                text: decodedErrorMessage,
             });
         }
 
         // Mostrar mensaje de éxito
         const successMessage = '@TempData["SuccessMessage"]';
         if (successMessage) {
+            // Decodifica las entidades HTML
+            const decodedSuccessMessage = decodeHtml(successMessage);
+
             Swal.fire({
                 icon: 'success',
                 title: 'Éxito',
-                text: successMessage,
+                text: decodedSuccessMessage,
             });
         }
+
+
     </script>
 }
 

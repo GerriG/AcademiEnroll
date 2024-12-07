@@ -116,7 +116,8 @@ CREATE TABLE MateriasAprobadas (
     IdEstudiante INT NOT NULL,       -- ID del estudiante
     IdMateria INT NOT NULL,          -- ID de la materia
     Promedio DECIMAL(5,1) NOT NULL,  -- Promedio con una decimal
-    FechaAprobacion DATETIME NOT NULL, -- Fecha de aprobación
+    FechaAprobacion DATETIME, -- Fecha de aprobación
+	Estado varchar(10),
 
     CONSTRAINT FK_MateriasAprobadas_Estudiantes FOREIGN KEY (IdEstudiante) 
         REFERENCES Estudiantes(IdEstudiante), -- Asegúrate de que la tabla Estudiantes exista
@@ -125,10 +126,6 @@ CREATE TABLE MateriasAprobadas (
 );
 END;
 GO
-
-select * from MateriasAprobadas
-
-update PeriodoGlobal set Periodo = 5
 
 -- Crear la tabla Inscripciones si no existe
 IF NOT EXISTS (
@@ -188,7 +185,6 @@ BEGIN
 		Periodo INT NOT NULL CHECK (Periodo BETWEEN 1 AND 5)  -- El periodo debe estar entre 1 y 5
 	);
 END;
-update PeriodoGlobal set Periodo = 2 WHERE Id = 1
 GO
 
 -- Crear o actualizar el procedimiento almacenado sp_AgregarNota

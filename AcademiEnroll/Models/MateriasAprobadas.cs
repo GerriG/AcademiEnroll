@@ -20,6 +20,8 @@ namespace AcademiEnroll.Models
         public decimal Promedio { get; set; }
 
         [Required]
-        public DateTime FechaAprobacion { get; set; }
+        public string? Estado { get; set; }
+        
+        public DateTime? FechaAprobacion { get; set; }
     }
 }

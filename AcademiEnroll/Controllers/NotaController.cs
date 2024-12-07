@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Web;
 
 namespace AcademiEnroll.Controllers
 {
@@ -18,83 +19,113 @@ namespace AcademiEnroll.Controllers
         }
 
         public async Task<IActionResult> Index()
-{
-        var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
-        if (string.IsNullOrEmpty(correoUsuario))
         {
+            var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(correoUsuario))
+            {
+                return RedirectToAction("Login", "Cuenta");
+            }
+
+            var rol = User.FindFirst("Rol")?.Value;
+            var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value;
+            var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
+
+            // Filtrar las materias aprobadas usando el IdMateria
+            var materiasAprobadas = await _context.MateriasAprobadas
+                                                   .Select(ma => new { ma.IdEstudiante, ma.IdMateria })
+                                                   .ToListAsync();
+
+            // Obtener el valor del periodoGlobal
+            var periodoGlobal = await _context.PeriodoGlobal                                               
+                                               .Select(c => c.Periodo)
+                                               .FirstOrDefaultAsync();
+
+            if (rol == "Docente" && !string.IsNullOrEmpty(idDocenteClaim) && int.TryParse(idDocenteClaim, out int idDocente))
+            {
+                // Obtener las notas del docente
+                var notasDocente = await (from n in _context.Notas
+                                          join d in _context.Docentes on n.IdDocente equals d.IdDocente
+                                          join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+                                          join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+                                          where periodoGlobal == 5 || // Mostrar todas las notas aprobadas si el periodo es 5
+                                                !_context.MateriasAprobadas
+                                                .Any(ma => ma.IdEstudiante.ToString() == n.NombreEstudiante && ma.IdMateria.ToString() == n.NombreAsignatura) // Excluir materias aprobadas si el periodo es diferente
+                                          select new NotaViewModel
+                                          {
+                                              Id = n.Id,
+                                              NombreEstudiante = e.Nombre,
+                                              Nombre = m.Nombre,
+                                              Calificacion = n.Calificacion,
+                                              NombreDocente = d.Nombre,
+                                              Periodo = n.Periodo
+                                          })
+                                         .OrderBy(n => n.Id)
+                                         .ToListAsync();
+
+                ViewBag.EsDocente = true;
+                ViewBag.EsAdministrador = false;
+                return View(notasDocente);
+            }
+
+            if (rol == "Estudiante")
+            {
+                // Obtener las notas del estudiante
+                var notasEstudiante = await (from n in _context.Notas
+                                             join d in _context.Docentes on n.IdDocente equals d.IdDocente
+                                             join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+                                             join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+                                             where periodoGlobal == 5 || // Mostrar todas las notas aprobadas si el periodo es 5
+                                                   !_context.MateriasAprobadas
+                                                   .Any(ma => ma.IdEstudiante.ToString() == n.NombreEstudiante && ma.IdMateria.ToString() == n.NombreAsignatura) // Excluir materias aprobadas si el periodo es diferente
+                                             select new NotaViewModel
+                                             {
+                                                 Id = n.Id,
+                                                 NombreEstudiante = e.Nombre,
+                                                 Nombre = m.Nombre,
+                                                 Calificacion = n.Calificacion,
+                                                 NombreDocente = d.Nombre,
+                                                 Periodo = n.Periodo
+                                             })
+                                              .OrderBy(n => n.Id)
+                                              .ToListAsync();
+
+                ViewBag.EsDocente = false;
+                ViewBag.EsAdministrador = false;
+                return View(notasEstudiante);
+            }
+
+            if (rol == "Administrador")
+            {
+                // Obtener todas las notas sin restricciones de materias aprobadas o reprobadas si el periodo es 5
+                var todasLasNotas = await (from n in _context.Notas
+                                           join d in _context.Docentes on n.IdDocente equals d.IdDocente
+                                           join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
+                                           join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+                                           where periodoGlobal == 5 || // Mostrar todas las notas aprobadas si el periodo es 5
+                                                 !_context.MateriasAprobadas
+                                                 .Any(ma => ma.IdEstudiante.ToString() == n.NombreEstudiante && ma.IdMateria.ToString() == n.NombreAsignatura) // Excluir materias aprobadas si el periodo es 1
+                                           select new NotaViewModel
+                                           {
+                                               Id = n.Id,
+                                               NombreEstudiante = e.Nombre,
+                                               Nombre = m.Nombre,
+                                               Calificacion = n.Calificacion,
+                                               NombreDocente = d.Nombre,
+                                               Periodo = n.Periodo
+                                           })
+                                          .OrderBy(n => n.Id)
+                                          .ToListAsync();
+
+                ViewBag.EsDocente = false;
+                ViewBag.EsAdministrador = true;
+                return View(todasLasNotas);
+            }
+
+            // Redirigir en caso de rol no identificado
             return RedirectToAction("Login", "Cuenta");
         }
 
-        var rol = User.FindFirst("Rol")?.Value;
-        var usuarioNombre = User.FindFirst(ClaimTypes.Name)?.Value;
-        var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
 
-        if (rol == "Docente" && !string.IsNullOrEmpty(idDocenteClaim) && int.TryParse(idDocenteClaim, out int idDocente))
-        {
-				    var notasDocente = await (from n in _context.Notas
-											     join d in _context.Docentes on n.IdDocente equals d.IdDocente
-											     join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
-											     join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
-											     select new NotaViewModel
-											     {
-												     Id = n.Id,
-												     NombreEstudiante = e.Nombre,
-												     Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
-												     Calificacion = n.Calificacion,
-												     NombreDocente = d.Nombre,
-												     Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
-											     })
-					    .OrderBy(n => n.Id)
-					    .ToListAsync();
-
-				    ViewBag.EsDocente = true;
-            ViewBag.EsAdministrador = false;
-            return View(notasDocente);
-        }
-
-        if (rol == "Estudiante")
-        {
-				    var notasEstudiante = await (from n in _context.Notas
-										       join d in _context.Docentes on n.IdDocente equals d.IdDocente
-										       join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
-										       join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
-										       select new NotaViewModel
-										       {
-											       Id = n.Id,
-											       NombreEstudiante = e.Nombre,
-											       Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
-											       Calificacion = n.Calificacion,
-											       NombreDocente = d.Nombre,
-											       Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
-										       })
-			    .OrderBy(n => n.Id)
-			    .ToListAsync();
-
-				    ViewBag.EsDocente = false;
-            ViewBag.EsAdministrador = false;
-            return View(notasEstudiante);
-        }
-
-			var todasLasNotas = await (from n in _context.Notas
-									   join d in _context.Docentes on n.IdDocente equals d.IdDocente
-									   join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
-									   join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
-									   select new NotaViewModel
-								   {
-									   Id = n.Id,
-									   NombreEstudiante = e.Nombre,
-									   Nombre = m.Nombre, // Usamos el nombre de la materia desde la tabla Materias
-									   Calificacion = n.Calificacion,
-									   NombreDocente = d.Nombre,
-									   Periodo = n.Periodo // Asegúrate de que esté disponible en el modelo Notas
-								   })
-	    .OrderBy(n => n.Id)
-	    .ToListAsync();
-
-			ViewBag.EsDocente = false;
-            ViewBag.EsAdministrador = true;
-            return View(todasLasNotas);
-        }
 
 
 
@@ -281,19 +312,24 @@ namespace AcademiEnroll.Controllers
             // Asignar el periodo al objeto Nota
             nota.Periodo = periodoGlobal.Periodo;
 
-            // Verificar si ya existe una nota para este estudiante, materia y periodo
+            // Verificar si ya existe una nota para este estudiante, materia, periodo y docente
             var notaExistente = await (from n in _context.Notas
                                        join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
-                                       where n.Periodo == nota.Periodo && n.NombreEstudiante == nota.NombreEstudiante
+                                       join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
+                                       where n.Periodo == nota.Periodo
+                                             && n.NombreEstudiante == nota.NombreEstudiante
+                                             && n.NombreAsignatura == nota.NombreAsignatura
+                                             && n.IdDocente == idDocente
                                        select new
                                        {
                                            n.Id,
-                                           NombreEstudiante = e.Nombre // Obtenemos el nombre del estudiante
+                                           NombreEstudiante = e.Nombre, // Obtenemos el nombre del estudiante
+                                           NombreMateria = m.Nombre // Nombre de la materia
                                        }).FirstOrDefaultAsync();
 
             if (notaExistente != null)
             {
-                TempData["ErrorMessage"] = $"El estudiante {notaExistente.NombreEstudiante} ya tiene una nota registrada para el periodo {nota.Periodo}.";
+                TempData["ErrorMessage"] = $"El estudiante {notaExistente.NombreEstudiante} ya tiene una nota registrada para el periodo {nota.Periodo} en la materia {notaExistente.NombreMateria}.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -307,6 +343,7 @@ namespace AcademiEnroll.Controllers
             TempData["SuccessMessage"] = "Nota creada exitosamente.";
             return RedirectToAction(nameof(Index));
         }
+
 
 
 
@@ -404,14 +441,17 @@ namespace AcademiEnroll.Controllers
 
             if (nota == null)
             {
-                return NotFound(); // Si no se encuentra la nota, retornar error 404
+                TempData["ErrorMessage"] = "No se encontró la nota a eliminar."; // Mensaje de error
+                return RedirectToAction(nameof(Index)); // Redirigir a la vista Index
             }
 
             _context.Notas.Remove(nota); // Eliminar la nota del contexto
             await _context.SaveChangesAsync(); // Guardar los cambios en la base de datos
 
+            TempData["SuccessMessage"] = "La nota fue eliminada exitosamente."; // Mensaje de éxito
             return RedirectToAction(nameof(Index)); // Redirigir al listado después de la eliminación
         }
+
 
         private bool NotaExists(int id)
         {
@@ -431,37 +471,54 @@ namespace AcademiEnroll.Controllers
                 // Calcular el promedio con una sola decimal
                 var promedio = Math.Round(notas.Average(n => n.Calificacion), 1);
 
-                if (promedio >= 6.0m)
+                // Determinar el estado dependiendo del promedio
+                string estado = (promedio >= 6.0m) ? "Aprobado" : "Reprobado";
+                DateTime? fechaAprobacion = (promedio >= 6.0m) ? DateTime.Now : (DateTime?)null;
+
+                // Revisar si ya existe en MateriasAprobadas
+                var materiaExistente = await _context.MateriasAprobadas
+                    .FirstOrDefaultAsync(ma => ma.IdMateria == idMateria && ma.IdEstudiante == idEstudiante);
+
+                if (materiaExistente == null)
                 {
-                    // Revisar si ya existe en MateriasAprobadas
-                    var aprobadaExistente = await _context.MateriasAprobadas
-                        .FirstOrDefaultAsync(ma => ma.IdMateria == idMateria && ma.IdEstudiante == idEstudiante);
-
-                    if (aprobadaExistente == null)
+                    // Mover a MateriasAprobadas con el nuevo estado y la fecha de aprobación (null si reprobado)
+                    var materiaAprobada = new MateriasAprobadas
                     {
-                        // Mover a MateriasAprobadas
-                        var materiaAprobada = new MateriasAprobadas
-                        {
-                            IdMateria = idMateria,
-                            IdEstudiante = idEstudiante,
-                            Promedio = promedio,
-                            FechaAprobacion = DateTime.Now
-                        };
+                        IdMateria = idMateria,
+                        IdEstudiante = idEstudiante,
+                        Promedio = promedio,
+                        Estado = estado,  // Asignar el estado calculado
+                        FechaAprobacion = fechaAprobacion  // Asignar la fecha (null si reprobado)
+                    };
 
-                        _context.MateriasAprobadas.Add(materiaAprobada);
-                        await _context.SaveChangesAsync();
+                    _context.MateriasAprobadas.Add(materiaAprobada);
+                    await _context.SaveChangesAsync();
 
-                        TempData["Success"] = "Materia aprobada y movida exitosamente.";
-                    }
+                    TempData["Success"] = (estado == "Aprobado")
+                        ? "Materia aprobada y movida exitosamente."
+                        : "Materia reprobada, pero movida a la lista de materias con estado Reprobado.";
                 }
                 else
                 {
-                    TempData["Error"] = "El promedio no alcanzó el mínimo para aprobar. Debes repetir la materia.";
+                    // Si ya existe la materia, actualizar el estado, promedio y fecha
+                    materiaExistente.Promedio = promedio;
+                    materiaExistente.Estado = estado;  // Actualizar el estado
+                    materiaExistente.FechaAprobacion = fechaAprobacion;  // Actualizar la fecha de aprobación
+
+                    _context.MateriasAprobadas.Update(materiaExistente);
+                    await _context.SaveChangesAsync();
+
+                    TempData["Success"] = (estado == "Aprobado")
+                        ? "Materia ya aprobada, se actualizó el estado y el promedio."
+                        : "Materia reprobada, se actualizó el estado a Reprobado y el promedio.";
                 }
+            }
+            else
+            {
+                TempData["Error"] = "No se tienen las 5 notas necesarias para calcular el promedio.";
             }
 
             return RedirectToAction(nameof(Index));
         }
-
     }
 }
