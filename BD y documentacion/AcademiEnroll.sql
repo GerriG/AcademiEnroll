@@ -104,6 +104,32 @@ BEGIN
 END;
 GO
 
+--Crear tabla de MateriasAprobadas si no existe en la base de datos
+IF NOT EXISTS (
+	SELECT 1 
+	FROM sys.tables 
+	WHERE name = 'MateriasAprobadas' AND type = 'U'
+)
+BEGIN
+CREATE TABLE MateriasAprobadas (
+    Id INT IDENTITY(1,1) PRIMARY KEY, -- Llave primaria con autoincremento
+    IdEstudiante INT NOT NULL,       -- ID del estudiante
+    IdMateria INT NOT NULL,          -- ID de la materia
+    Promedio DECIMAL(5,1) NOT NULL,  -- Promedio con una decimal
+    FechaAprobacion DATETIME NOT NULL, -- Fecha de aprobación
+
+    CONSTRAINT FK_MateriasAprobadas_Estudiantes FOREIGN KEY (IdEstudiante) 
+        REFERENCES Estudiantes(IdEstudiante), -- Asegúrate de que la tabla Estudiantes exista
+    CONSTRAINT FK_MateriasAprobadas_Materias FOREIGN KEY (IdMateria) 
+        REFERENCES Materias(Id)     -- Asegúrate de que la tabla Materias exista
+);
+END;
+GO
+
+select * from MateriasAprobadas
+
+update PeriodoGlobal set Periodo = 5
+
 -- Crear la tabla Inscripciones si no existe
 IF NOT EXISTS (
 	SELECT 1 
