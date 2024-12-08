@@ -1,10 +1,105 @@
-﻿@model IEnumerable<AcademiEnroll.Models.Docente>
+﻿@model IEnumerable<AcademiEnroll.Models.ReporteDocente>
 @{
-    ViewData["Title"] = "Vista Administrador";
+    ViewData["Title"] = "Reporte Docente";
 }
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<h1 class="mt-4">Reporte Docente</h1>
+<ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item active">Reporte Docente</li>
+</ol>
 
-<h1>Bienvenido Docente</h1>
+@{
+    var colors = new List<string> { "bg-primary", "bg-success", "bg-danger", "bg-warning", "bg-info" };
+}
+
+@foreach (var (reporte, index) in Model.Select((reporte, index) => (reporte, index)))
+{
+    <div class="row">
+        <!-- Primera Fila -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card @colors[index % colors.Count] text-white mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>Nombre del Docente</h6>
+                            <h6 id="nombreDocente">@reporte.NombreDocente</h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-chalkboard-teacher fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card @colors[(index + 1) % colors.Count] text-white mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>Materias Impartidas</h6>
+                            <h6 id="materiasImpartidas">@reporte.MateriasImpartidas</h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>Estudiantes Inscritos</h6>
+                            <h6 id="totalEstudiantes">@reporte.TotalEstudiantes</h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-graduate fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Segunda Fila -->
+        <div class="col-xl-4 col-md-6">
+            <div class="card @colors[(index + 3) % colors.Count] text-white mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>Estudiantes Aprobados</h6>
+                            <h6 id="totalAprobados">@reporte.TotalAprobados</h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>Estudiantes Reprobados</h6>
+                            <h6 id="totalReprobados">@reporte.TotalReprobados</h6>
+                        </div>
+                        <div class="col-sm-3">
+                            <i class="fas fa-user-times fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 

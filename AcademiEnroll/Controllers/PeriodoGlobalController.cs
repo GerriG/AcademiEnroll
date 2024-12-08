@@ -68,13 +68,38 @@ namespace AcademiEnroll.Controllers
                 try
                 {
                     // Buscar el periodo en la base de datos
-                    var periodoGlobal = await _context.PeriodoGlobal.FindAsync(1);
+                    var periodoGlobal = await _context.PeriodoGlobal.FindAsync(1);  // Suponiendo que solo hay un periodo global
                     if (periodoGlobal != null)
                     {
                         // Actualizar el valor del periodo
                         periodoGlobal.Periodo = periodo;
                         _context.Update(periodoGlobal);
                         await _context.SaveChangesAsync();
+
+                        // Si el periodo es 1, ejecutar la lógica de retiro de materias
+                        if (periodo == 1)
+                        {
+                            // Obtener las inscripciones de todos los estudiantes
+                            var inscripciones = await _context.Inscripciones.ToListAsync();
+
+                            foreach (var inscripcion in inscripciones)
+                            {
+                                // Obtener las notas del estudiante en esa materia
+                                var notas = await _context.Notas
+                                    .Where(n => n.NombreAsignatura == inscripcion.IdMateria.ToString() && n.NombreEstudiante == inscripcion.IdEstudiante.ToString())
+                                    .ToListAsync();
+
+                                // Si el estudiante tiene 5 notas y es el periodo 1, retirar la materia
+                                if (notas.Count == 5)
+                                {
+                                    // Eliminar la inscripción de la materia
+                                    _context.Inscripciones.Remove(inscripcion);
+                                    await _context.SaveChangesAsync();
+
+                                    TempData["Info"] = $"Materia {inscripcion.IdMateria} retirada automáticamente para el estudiante {inscripcion.IdEstudiante}.";
+                                }
+                            }
+                        }
                     }
 
                     // Redirigir a Index con mensaje de éxito
@@ -93,6 +118,7 @@ namespace AcademiEnroll.Controllers
 
             return View(periodo);
         }
+
 
         // GET: PeriodoGlobal/Index
         public async Task<IActionResult> Index()

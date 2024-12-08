@@ -121,6 +121,12 @@ namespace AcademiEnroll.Data
                 .WithMany()
                 .HasForeignKey(ma => ma.IdMateria)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MateriasAprobadas>()
+                .HasOne<Materia>()
+                .WithMany()
+                .HasForeignKey(ma => ma.IdMateria);
+
         }
 
         // Método para ejecutar un procedimiento almacenado para el Dashboard usando EF Core

@@ -204,6 +204,61 @@ BEGIN
 END;
 GO
 
+--SP para Panel de Docentes
+CREATE OR ALTER PROCEDURE SPReporteDocente
+    @IdDocente INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- CTE para identificar las materias impartidas por el docente
+    WITH MateriasImpartidas AS (
+        SELECT 
+            m.Id AS IdMateria,
+            m.Nombre AS NombreMateria,
+            m.IdDocente
+        FROM Materias m
+        WHERE m.IdDocente = @IdDocente
+    ),
+    -- CTE para contar la cantidad total de estudiantes inscritos en todas las materias del docente
+    TotalEstudiantes AS (
+        SELECT 
+            COUNT(DISTINCT i.IdEstudiante) AS Total
+        FROM Inscripciones i
+        INNER JOIN MateriasImpartidas mi ON i.IdMateria = mi.IdMateria
+    ),
+    -- CTE para contar la cantidad de estudiantes aprobados en todas las materias del docente
+    TotalAprobados AS (
+        SELECT 
+            COUNT(ma.IdEstudiante) AS Total
+        FROM MateriasAprobadas ma
+        INNER JOIN MateriasImpartidas mi ON ma.IdMateria = mi.IdMateria
+        WHERE ma.Estado = 'Aprobado' OR ma.Promedio >= 6 -- Ajusta el promedio según tus reglas
+    ),
+    -- CTE para contar la cantidad de estudiantes reprobados en todas las materias del docente
+    TotalReprobados AS (
+        SELECT 
+            COUNT(ma.IdEstudiante) AS Total
+        FROM MateriasAprobadas ma
+        INNER JOIN MateriasImpartidas mi ON ma.IdMateria = mi.IdMateria
+        WHERE ma.Estado = 'Reprobado' OR ma.Promedio < 6 -- Ajusta el promedio según tus reglas
+    )
+    -- Consulta final
+    SELECT 
+        d.Nombre AS Docente,
+        (SELECT COUNT(*) FROM MateriasImpartidas) AS MateriasImpartidas,
+        (SELECT Total FROM TotalEstudiantes) AS TotalEstudiantes,
+        (SELECT Total FROM TotalAprobados) AS TotalAprobados,
+        (SELECT Total FROM TotalReprobados) AS TotalReprobados
+    FROM Docentes d
+    WHERE d.IdDocente = @IdDocente;
+
+END;
+GO
+
+select * from Inscripciones
+GO
+
 -- Crear o actualizar el procedimiento almacenado SP_ActualizarNota
 CREATE OR ALTER PROCEDURE SP_ActualizarNota
 	@Id INT,

@@ -1,0 +1,112 @@
+﻿@{
+    var materiasAprobadas = ViewData["MateriasAprobadas"] as IEnumerable<dynamic>;
+}
+@{
+    ViewData["Title"] = "NotasPorEstudiante";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Estilos {
+    <link href="https://cdn.datatables.net/buttons/3.2.0/css/buttons.dataTables.css" rel="stylesheet" />
+
+    <style>
+        .btn-exportar-excel {
+            background-color: #198754 !important;
+            color: white !important;
+        }
+
+        .btn-exportar-pdf {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+
+        .btn-exportar-print {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+    </style>
+}
+
+<h2>Estado de Materias</h2>
+
+<table class="table table-striped" id="materiaTable">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>ID Materia</th>
+            <th>Nombre de la Materia</th>
+            <th>Promedio</th>
+            <th>Estado</th>
+            <th>Fecha de Aprobación</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (materiasAprobadas != null)
+        {
+            foreach (var materia in materiasAprobadas)
+            {
+                <tr>
+                    <td>@materia.Id</td>
+                    <td>@materia.IdMateria</td>
+                    <td>@materia.NombreMateria</td>
+                    <td>@materia.Promedio</td>
+                    <td>@materia.Estado</td>
+                    <td>@materia.FechaAprobacion?.ToString("yyyy-MM-dd")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6">No hay materias aprobadas para mostrar.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <script src="//cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.print.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#materiaTable').DataTable({
+                "language": {
+                    "url": "https://cdn.datatables.net/plug-ins/1.11.5/i18n/es-MX.json"
+                },
+                dom: "<'row'<'col-md-6 text-start'B><'col-md-6 text-end'f>>rt<'bottom'lp><'clear'>",
+                buttons: [
+                    {
+                        extend: "excelHtml5",
+                        text: "<i class='fas fa-file-excel'></i> Exportar Excel",
+                        filename: "Reporte de materias",
+                        title: "",
+                        className: "btn-exportar-excel"
+                    },
+                    {
+                        extend: "pdfHtml5",
+                        text: "<i class='fas fa-file-pdf'></i> Exportar PDF",
+                        filename: "Reporte de materias",
+                        title: "",
+                        className: "btn-exportar-pdf"
+                    },
+                    {
+                        extend: "print",
+                        text: "<i class='fas fa-print'></i> Imprimir",
+                        title: "",
+                        className: "btn-exportar-print"
+                    },
+                    "pageLength"
+                ]
+            });
+        });
+    </script>
+}
+
+

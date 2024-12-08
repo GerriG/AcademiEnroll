@@ -225,30 +225,46 @@ public class CuentaController : Controller
     }
 
     // Creación de la vista para el Docente
-    public IActionResult VistaDocente()
+    public async Task<IActionResult> VistaDocente()
     {
-        // Obtener el correo del usuario desde los claims
-        var correoUsuario = User.FindFirst(ClaimTypes.Email)?.Value;
-
-        // Verificar si el correo es nulo o vacío
-        if (string.IsNullOrEmpty(correoUsuario))
+        // Obtener el IdDocente del usuario logeado desde los claims
+        var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
+        if (string.IsNullOrEmpty(idDocenteClaim))
         {
-            // Redirigir al usuario a la página de login si no está autenticado
-            return RedirectToAction("Login", "Cuenta");
-        }
-
-        // Obtener el rol del usuario desde los claims
-        var userRol = User.FindFirst("Rol")?.Value;
-
-        // Verificar si el rol es "Docente"
-        if (userRol != "Docente")
-        {
-            // Si el rol no es "Docente", devolver un Unauthorized
             return Unauthorized("Estimado Usuario, usted no es un Docente.");
         }
 
-        // Si las validaciones pasan, retornar la vista de Docente
-        return View("VistaDocente");
+        int idDocente = int.Parse(idDocenteClaim);
+        List<ReporteDocente> reportesDocente = new List<ReporteDocente>();
+
+        using (var connection = (SqlConnection)_context.Database.GetDbConnection())
+        {
+            await connection.OpenAsync();
+
+            using (var command = new SqlCommand("SPReporteDocente", connection))
+            {
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+                command.Parameters.Add(new SqlParameter("@IdDocente", idDocente));
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var reporte = new ReporteDocente
+                        {
+                            NombreDocente = reader.GetString(0),
+                            MateriasImpartidas = reader.GetInt32(1),
+                            TotalEstudiantes = reader.GetInt32(2),
+                            TotalAprobados = reader.GetInt32(3),
+                            TotalReprobados = reader.GetInt32(4)
+                        };
+                        reportesDocente.Add(reporte);
+                    }
+                }
+            }
+        }
+
+        return View(reportesDocente);
     }
 
 
