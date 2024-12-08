@@ -40,8 +40,7 @@ namespace AcademiEnroll.Controllers
             if (periodo == null)
             {
                 periodo = new PeriodoGlobal
-                {
-                    Id = 1,    // Asignar el Id fijo de 1
+                {                    
                     Periodo = 1 // Asignar el valor predeterminado de 1
                 };
 

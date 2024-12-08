@@ -43,11 +43,22 @@ namespace AcademiEnroll.Controllers
             if (rol == "Docente" && !string.IsNullOrEmpty(idDocenteClaim) && int.TryParse(idDocenteClaim, out int idDocente))
             {
                 // Obtener las notas del docente (sin filtrarlas por periodo)
+                // Obtener el IdDocente del claim
+                var usuarioIdDocente = User.Claims.FirstOrDefault(c => c.Type == "IdDocente")?.Value;
+
+                if (usuarioIdDocente == null)
+                {
+                    // Si no se encuentra el claim de IdDocente, redirigir o mostrar error.
+                    return Unauthorized();
+                }
+
+                var docenteId = int.Parse(usuarioIdDocente); // Convertir el IdDocente a entero
+
                 var notasDocente = await (from n in _context.Notas
                                           join d in _context.Docentes on n.IdDocente equals d.IdDocente
                                           join e in _context.Estudiantes on n.NombreEstudiante equals e.IdEstudiante.ToString()
                                           join m in _context.Materias on n.NombreAsignatura equals m.Id.ToString()
-                                          // Eliminar la restricción que oculta notas en el periodo 1
+                                          where n.IdDocente == docenteId  // Filtrar por IdDocente
                                           select new NotaViewModel
                                           {
                                               Id = n.Id,
@@ -60,8 +71,10 @@ namespace AcademiEnroll.Controllers
                                          .OrderBy(n => n.Id)
                                          .ToListAsync();
 
+                // Configurar los ViewBag según el rol
                 ViewBag.EsDocente = true;
                 ViewBag.EsAdministrador = false;
+
                 return View(notasDocente);
             }
 
