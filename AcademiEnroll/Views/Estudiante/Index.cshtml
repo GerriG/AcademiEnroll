@@ -76,6 +76,12 @@
         }
     </tbody>
 </table>
+
+@{
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
+}
+
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js" crossorigin="anonymous"></script>
     <script src="//cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
@@ -85,6 +91,7 @@
     <script src="https://cdn.datatables.net/buttons/3.2.0/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.2.0/js/buttons.print.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function () {
@@ -117,6 +124,31 @@
                     "pageLength"
                 ]
             });
-        });
+
+            // Mostrar SweetAlert de éxito si hay mensaje
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <text>
+                        Swal.fire({
+                            icon: 'success',
+                        title: '@successMessage',
+                        showConfirmButton: false,
+                        timer: 1500
+                                });
+            </text>
+        }
+
+                // Mostrar SweetAlert de error si hay mensaje de error
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <text>
+                        Swal.fire({
+                            icon: 'error',
+                        title: '@errorMessage',
+                        showConfirmButton: true
+                                });
+            </text>
+        }
+                });
     </script>
 }

@@ -170,7 +170,8 @@ namespace Administrador.Controllers
 
                 if (estudiante == null)
                 {
-                    return NotFound("El estudiante no fue encontrado.");
+                    TempData["ErrorMessage"] = "El estudiante no fue encontrado.";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 // Obtener el IdUsuario asociado al estudiante
@@ -179,17 +180,24 @@ namespace Administrador.Controllers
                 // Validar que el IdUsuario exista antes de intentar eliminarlo
                 if (idUsuario <= 0)
                 {
-                    return BadRequest("El usuario asociado al estudiante no es válido.");
+                    TempData["ErrorMessage"] = "El usuario asociado al estudiante no es válido.";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 // Eliminar el usuario en la tabla Usuarios (esto elimina en cascada el estudiante)
                 await _mantenimientoEstudiante.BorrarUsuario(idUsuario);
 
+                // Agregar mensaje de éxito
+                TempData["SuccessMessage"] = "Estudiante eliminado correctamente.";
+
+                // Redirigir a la vista Index
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                // En caso de un error inesperado
+                TempData["ErrorMessage"] = "Ocurrió un error al eliminar el estudiante: " + ex.Message;
+                return RedirectToAction(nameof(Index));
             }
         }
     }

@@ -36,3 +36,28 @@
         <a asp-action="Index" class="btn btn-warning">Regresar al listado</a>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Al hacer click en el botón de eliminar, muestra un SweetAlert para confirmar
+            $("form").submit(function (event) {
+                event.preventDefault(); // Prevenir la acción por defecto del formulario
+
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "¡Este cambio no se puede deshacer!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Si el usuario confirma la eliminación, envía el formulario
+                        this.submit();
+                    }
+                });
+            });
+        });
+    </script>
+}
