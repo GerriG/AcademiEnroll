@@ -177,17 +177,28 @@ namespace Administrador.Controllers
             var docente = await _context.Docentes.FindAsync(id);
             if (docente == null)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "No se encontró al docente.";
+                return RedirectToAction(nameof(Index));
             }
 
-            var usuario = await _context.Usuarios.FindAsync(docente.IdUsuario);
-            if (usuario == null)
+            try
             {
-                return BadRequest("El usuario asociado al docente no fue encontrado.");
-            }
+                var usuario = await _context.Usuarios.FindAsync(docente.IdUsuario);
+                if (usuario == null)
+                {
+                    TempData["ErrorMessage"] = "El usuario asociado al docente no fue encontrado.";
+                    return RedirectToAction(nameof(Index));
+                }
 
-            _context.Usuarios.Remove(usuario);
-            await _context.SaveChangesAsync();
+                _context.Usuarios.Remove(usuario);               
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Docente eliminado correctamente"; // Mostrar mensaje de éxito
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "Error al eliminar el docente."; // Mostrar mensaje de error
+            }
 
             return RedirectToAction(nameof(Index));
         }

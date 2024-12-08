@@ -231,7 +231,7 @@ public class CuentaController : Controller
         var idDocenteClaim = User.FindFirst("IdDocente")?.Value;
         if (string.IsNullOrEmpty(idDocenteClaim))
         {
-            return Unauthorized("Estimado Usuario, usted no es un Docente.");
+            return Unauthorized();
         }
 
         int idDocente = int.Parse(idDocenteClaim);

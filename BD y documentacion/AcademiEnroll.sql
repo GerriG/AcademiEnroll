@@ -114,17 +114,21 @@ BEGIN
 CREATE TABLE MateriasAprobadas (
     Id INT IDENTITY(1,1) PRIMARY KEY, -- Llave primaria con autoincremento
     IdEstudiante INT NOT NULL,       -- ID del estudiante
-    IdMateria INT NOT NULL,          -- ID de la materia
-    Promedio DECIMAL(5,1) NOT NULL,  -- Promedio con una decimal
-    FechaAprobacion DATETIME, -- Fecha de aprobación
-	Estado varchar(10),
+    IdMateria INT NULL,              -- ID de la materia (ahora permite NULL)
+    Promedio DECIMAL(5,1) NOT NULL,  -- Promedio con un decimal
+    FechaAprobacion DATETIME,        -- Fecha de aprobación
+    Estado VARCHAR(10),              -- Estado de la materia aprobada
 
+    -- Clave foránea para IdEstudiante (sin cascada explícita aquí)
     CONSTRAINT FK_MateriasAprobadas_Estudiantes FOREIGN KEY (IdEstudiante) 
-        REFERENCES Estudiantes(IdEstudiante), -- Asegúrate de que la tabla Estudiantes exista
+        REFERENCES Estudiantes(IdEstudiante), 
+
+    -- Clave foránea para IdMateria con ON DELETE CASCADE
     CONSTRAINT FK_MateriasAprobadas_Materias FOREIGN KEY (IdMateria) 
-        REFERENCES Materias(Id)     -- Asegúrate de que la tabla Materias exista
+        REFERENCES Materias(Id) 
+        ON DELETE SET NULL
 );
-END;
+END
 GO
 
 -- Crear la tabla Inscripciones si no existe
@@ -168,11 +172,13 @@ BEGIN
     NombreAsignatura NVARCHAR(100) NOT NULL,
     Calificacion DECIMAL(5,2) NOT NULL,
     Periodo INT NOT NULL,  -- Columna para almacenar el periodo
-    CONSTRAINT FK_Notas_Docentes FOREIGN KEY (IdDocente) REFERENCES Docentes(IdDocente)
+    CONSTRAINT FK_Notas_Docentes FOREIGN KEY (IdDocente) 
+        REFERENCES Docentes(IdDocente) 
+        ON DELETE CASCADE
 );
-END;
+END
 GO
-select * from Materias
+
 -- Crear la tabla PeriodoGlobal si no existe
 IF NOT EXISTS (
 	SELECT 1 
