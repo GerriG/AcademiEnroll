@@ -45,7 +45,7 @@ BEGIN
 	);
 END;
 GO
-select * from materias
+
 -- Crear la tabla Docentes si no existe
 IF NOT EXISTS (
 	SELECT 1 
@@ -354,6 +354,67 @@ END;
 GO
 
 exec sp_ReporteDashboard
+
+Go
+
+-- Insertar registros en la tabla Usuarios
+INSERT INTO Usuarios (Nombre, Correo, Clave, Rol) 
+VALUES 
+('Ana Gonzalez', 'ana@academienroll.com', 'ana123', 'Estudiante'),
+('Luis Fernandez', 'luis@academienroll.com', 'luis123', 'Estudiante'),
+('Juan Martinez', 'juan@academienroll.com', 'juan123', 'Docente'),
+('Laura Diaz', 'laura@academienroll.com', 'laura123', 'Docente'),
+('Admin1', 'admin1@academienroll.com', 'admin123', 'Administrador'),
+('Admin2', 'admin2@academienroll.com', 'admin456', 'Administrador');
+
+-- Insertar registros en la tabla Estudiantes
+INSERT INTO Estudiantes (Nombre, Correo, IdUsuario) 
+VALUES 
+('Ana Gonzalez', 'ana@academienroll.com', 1),
+('Luis Fernandez', 'luis@academienroll.com', 2);
+
+-- Insertar registros en la tabla Docentes
+INSERT INTO Docentes (Nombre, Correo, IdUsuario) 
+VALUES 
+('Juan Martinez', 'juan@academienroll.com', 3),
+('Laura Diaz', 'laura@academienroll.com', 4);
+
+-- Insertar registros en la tabla Administrador
+INSERT INTO Administrador (Nombre, Correo, IdUsuario) 
+VALUES 
+('Admin1', 'admin1@academienroll.com', 5),
+('Admin2', 'admin2@academienroll.com', 6);
+
+-- Insertar registros en la tabla Materias
+INSERT INTO Materias (Nombre, Codigo, IdDocente) 
+VALUES 
+('Matemáticas Avanzadas', 'MAT101', 3),
+('Programación Básica', 'PRG102', 4);
+
+-- Insertar registros en la tabla Inscripciones
+INSERT INTO Inscripciones (IdMateria, IdEstudiante, FechaInscripcion) 
+VALUES 
+(1, 1, GETDATE()),
+(2, 2, GETDATE());
+
+-- Insertar registros en la tabla MateriasAprobadas
+INSERT INTO MateriasAprobadas (IdEstudiante, IdMateria, Promedio, FechaAprobacion, Estado) 
+VALUES 
+(1, 1, 8.5, GETDATE(), 'Aprobado'),
+(2, 2, 6.0, GETDATE(), 'Aprobado');
+
+-- Insertar registros en la tabla Notas
+INSERT INTO Notas (IdDocente, NombreEstudiante, NombreAsignatura, Calificacion, Periodo) 
+VALUES 
+(3, 'Ana Gonzalez', 'Matemáticas Avanzadas', 8.5, 1),
+(4, 'Luis Fernandez', 'Programación Básica', 6.0, 1);
+
+-- Insertar registros en la tabla PeriodoGlobal
+INSERT INTO PeriodoGlobal (Periodo) 
+VALUES 
+(2)
+
+Go
 
 -- Consultar registros de las tablas
 SELECT * FROM Usuarios;

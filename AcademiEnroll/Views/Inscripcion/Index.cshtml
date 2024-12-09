@@ -20,7 +20,7 @@
     </div>
 }
 
-<table class="table">
+<table id="materias" class="table table-striped">
     <thead>
         <tr>
             <th>Nombre</th>
@@ -39,9 +39,7 @@
                 <td>
                     @if (inscripciones.Any(i => i.IdMateria == materia.Id))
                     {
-
                         <a href="@Url.Action("Details", "Inscripcion", new { id = materia.Id })" class="btn btn-info">Ver Detalles</a>
-
 
                         <form method="post" asp-action="Retirar" asp-route-id="@materia.Id" style="display:inline;" onsubmit="return confirm('¿Está seguro de retirar esta materia?');">
                             <button type="submit" class="btn btn-danger">Retirar</button>
@@ -49,7 +47,6 @@
                     }
                     else
                     {
-                        <!-- Botón para inscribirse en la materia -->
                         <form method="post" asp-action="Inscribir" asp-route-id="@materia.Id" style="display:inline;">
                             <button type="submit" class="btn btn-primary">Inscribir</button>
                         </form>
@@ -59,5 +56,71 @@
         }
     </tbody>
 </table>
+
+@section Estilos {
+    <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/buttons/2.1.0/css/buttons.dataTables.min.css" rel="stylesheet" />
+
+    <style>
+        .btn-exportar-excel {
+            background-color: #198754 !important;
+            color: white !important;
+        }
+
+        .btn-exportar-pdf {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+
+        .btn-exportar-print {
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.1.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.1.0/js/buttons.print.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#materias').DataTable({
+                dom: "<'row'<'col-md-6 text-start'B><'col-md-6 text-end'f>>rt<'bottom'lp><'clear'>",
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Exportar Excel',
+                        title: 'Reporte de Materias',
+                        className: 'btn-exportar-excel'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: '<i class="fas fa-file-pdf"></i> Exportar PDF',
+                        title: 'Reporte de Materias',
+                        className: 'btn-exportar-pdf'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Imprimir',
+                        title: 'Reporte de Materias',
+                        className: 'btn-exportar-print'
+                    },
+                    'pageLength'
+                ],
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.12.1/i18n/es-MX.json'
+                }
+            });
+        });
+    </script>
+}
+
 
 
