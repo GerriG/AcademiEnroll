@@ -1,8 +1,6 @@
 AcademiEnroll es un sistema universitario capaz de registrar estudiantes, docentes y administradores. Brindando la capacidad de crear e inscribir materias, cargar notas, administrar docentes, estudiantes y otros administradores.
 
-Fué desarrollado por:
-* Diego Durán          
-* Erick Durán           
+Fué desarrollado por:                  
 * Osaki Hernández 
 * Diego Hernández  
 * Adonay López
