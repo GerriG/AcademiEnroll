@@ -83,4 +83,4 @@ Este proyecto fue desarrollado para la cátedra de **Programación II** en la **
 5.  Acceder en el navegador (usualmente `https://localhost:7001` o similar).
 
 ---
-© 2025 AcademiEnroll - Soluciones Educativas Digitales.
+© 2024 AcademiEnroll - Soluciones Educativas Digitales.
